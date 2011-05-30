@@ -3014,6 +3014,24 @@ void Player::ResetAllPowers()
     }
 }
 
+bool Player::CanInteractWithQuestGiver(Object* questGiver)
+{
+    switch (questGiver->GetTypeId())
+    {
+        case TYPEID_UNIT:
+            return GetNPCIfCanInteractWith(questGiver->GetGUID(), UNIT_NPC_FLAG_QUESTGIVER) != NULL;
+        case TYPEID_GAMEOBJECT:
+            return GetGameObjectIfCanInteractWith(questGiver->GetGUID(), GAMEOBJECT_TYPE_QUESTGIVER) != NULL;
+        case TYPEID_PLAYER:
+            return isAlive() && questGiver->ToPlayer()->isAlive();
+        case TYPEID_ITEM:
+            return isAlive();
+        default:
+            break;
+    }
+    return false;
+}
+
 Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
 {
     // unit checks
@@ -3358,10 +3376,9 @@ void Player::GiveXP(uint32 xp, Unit *victim, float group_rate)
 // Current player experience not update (must be update by caller)
 void Player::GiveLevel(uint8 level)
 {
-    if (level == getLevel())
+    uint8 oldLevel = getLevel();
+    if (level == oldLevel)
         return;
-
-    sScriptMgr->OnPlayerLevelChanged(this, level);
 
     PlayerLevelInfo info;
     sObjectMgr->GetPlayerLevelInfo(getRace(), getClass(), level, &info);
@@ -3438,6 +3455,8 @@ void Player::GiveLevel(uint8 level)
     }
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
+
+    sScriptMgr->OnPlayerLevelChanged(this, oldLevel);
 }
 
 void Player::InitTalentForLevel()
