@@ -506,7 +506,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket &packet, WorldSes
 
             switch(emoteNum)
             {
-                case TEXTEMOTE_BONK:
+                case TEXT_EMOTE_BONK:
                 {
                     Player *const pPlayer = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
                     if(!pPlayer || !pPlayer->GetPlayerbotAI()) return;
@@ -562,8 +562,8 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket &packet, WorldSes
                     return;
                 }
 
-                case TEXTEMOTE_EAT:
-                case TEXTEMOTE_DRINK:
+                case TEXT_EMOTE_EAT:
+                case TEXT_EMOTE_DRINK:
                 {
                     Player *const bot = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
                     if(bot) bot->GetPlayerbotAI()->Stay();
@@ -578,7 +578,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket &packet, WorldSes
                 }
 
                 //emote to stay
-                case TEXTEMOTE_STAND:
+                case TEXT_EMOTE_STAND:
                 {
                     Player *const bot = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
                     if(bot) bot->GetPlayerbotAI()->Stay();
@@ -595,7 +595,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket &packet, WorldSes
                 //324 is the followme emote (not defined in enum)
                 //if master has bot selected then only bot follows, else all bots follow
                 case 324:
-                case TEXTEMOTE_WAVE:
+                case TEXT_EMOTE_WAVE:
                 {
                     Player *const bot = masterSession.GetPlayerBot(masterSession.GetPlayer()->GetSelection());
                     if(bot)
@@ -1459,7 +1459,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket &packet)
 
             switch(text_emote)
             {
-                case TEXTEMOTE_BOW:
+                case TEXT_EMOTE_BOW:
                 {
                     //Buff anyone who bows before me. Useful for players not in bot's group
                     Player *pPlayer = sObjectMgr->GetPlayer(guid);

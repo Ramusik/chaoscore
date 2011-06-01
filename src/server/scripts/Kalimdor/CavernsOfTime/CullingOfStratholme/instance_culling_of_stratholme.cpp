@@ -19,6 +19,8 @@
 #include "culling_of_stratholme.h"
 
 #define MAX_ENCOUNTER 7
+#define ACHIEVEMENT_ZOMBIEFEST 1872
+#define ZOMBIEFEST_MIN_COUNT   100
 
 /* Culling of Stratholme encounters:
 0 - Plague Crates
@@ -58,6 +60,9 @@ public:
         uint64 uiMalGanisChest;
         uint32 uiCountdownTimer;
         uint16 uiCountdownMinute;
+	// Zombiefest!
+	  uint32 zombiesCount;
+	  uint32 zombieFestTimer;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
@@ -72,6 +77,8 @@ public:
             uiCountCrates = 0;
             uiCountdownTimer = 0;
             uiCountdownMinute = 26;
+	       zombiesCount = 0;
+	       zombieFestTimer = 0;
         }
 
 
@@ -224,6 +231,17 @@ public:
                             }
                         }   break;
                     }
+	               break;
+	           case DATA_ZOMBIEFEST:
+	                    if (data == ACHI_START)
+	                        zombieFestTimer = 60 * IN_MILLISECONDS;
+	                    else if (data == ACHI_INCREASE)
+	                        ++zombiesCount;
+	                    else if (data == ACHI_RESET)
+	                    {
+	                        zombiesCount = 0;
+	                        zombieFestTimer = 0;
+	                    }
                     break;
                 case DATA_ARTHAS_EVENT:
                     m_auiEncounter[6] = data;
@@ -246,6 +264,11 @@ public:
                 case DATA_INFINITE_EVENT:             return m_auiEncounter[5];
                 case DATA_ARTHAS_EVENT:               return m_auiEncounter[6];
                 case DATA_COUNTDOWN:                  return uiCountdownMinute;
+	           case DATA_ZOMBIEFEST:
+	                if (zombieFestTimer == 0)
+	                        return ACHI_IS_NOT_STARTED;
+	                    else
+	                        return ACHI_IS_IN_PROGRESS;
             }
             return 0;
         }
@@ -342,6 +365,23 @@ public:
                     }
                     uiCountdownTimer -= diff;
                 }
+	
+	            // Achievement Zombiefest! control
+	            if (zombieFestTimer)
+	            {
+	                if (zombiesCount >= ZOMBIEFEST_MIN_COUNT)
+	                {
+	                    DoCompleteAchievement(ACHIEVEMENT_ZOMBIEFEST);
+	
+	                    SetData(DATA_ZOMBIEFEST, ACHI_RESET);
+	                    return;
+	                }
+	
+	                if (zombieFestTimer <= diff)
+	                    SetData(DATA_ZOMBIEFEST, ACHI_RESET);
+	                else zombieFestTimer -= diff;
+	            }
+	
         }
     };
 };

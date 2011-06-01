@@ -722,7 +722,7 @@ public:
         {
             if(m_Phase >= PHASE_BRAIN)
             {
-                if(emote == TEXTEMOTE_KISS)
+                if(emote == TEXT_EMOTE_KISS)
                 {
                     if(pPlayer->HasAchieved(RAID_MODE(ACHIEVMENT_KISS_AND_MAKE_UP_10,ACHIEVMENT_KISS_AND_MAKE_UP_25)))
                         return;

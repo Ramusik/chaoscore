@@ -27,7 +27,8 @@ enum Data
     DATA_MAL_GANIS_EVENT,
     DATA_INFINITE_EVENT,
     DATA_ARTHAS_EVENT,
-    DATA_COUNTDOWN
+    DATA_COUNTDOWN,
+    DATA_ZOMBIEFEST
 };
 
 enum Data64
@@ -47,26 +48,24 @@ enum Data64
 
 enum Creatures
 {
-    NPC_MEATHOOK        = 26529,
-    NPC_SALRAMM         = 26530,
-    NPC_EPOCH           = 26532,
-    NPC_MAL_GANIS       = 26533,
-    NPC_INFINITE        = 32273,
-    NPC_ARTHAS          = 26499,
-    NPC_JAINA           = 26497,
-    NPC_UTHER           = 26528,
-    NPC_CHROMIE_2       = 27915,
-    NPC_GENERIC_BUNNY   = 28960,
+    NPC_MEATHOOK           = 26529,
+    NPC_SALRAMM            = 26530,
+    NPC_EPOCH              = 26532,
+    NPC_MAL_GANIS          = 26533,
+    NPC_INFINITE           = 32273,
+    NPC_ARTHAS             = 26499,
+    NPC_JAINA              = 26497,
+    NPC_UTHER              = 26528
 };
 
 enum GameObjects
 {
-    GO_SHKAF_GATE       = 188686,
-    GO_MALGANIS_GATE_1  = 187711,
-    GO_MALGANIS_GATE_2  = 187723,
-    GO_EXIT_GATE        = 191788,
-    GO_MALGANIS_CHEST_N = 190663,
-    GO_MALGANIS_CHEST_H = 193597,
+    GO_SHKAF_GATE                                          = 188686,
+    GO_MALGANIS_GATE_1                                     = 187711,
+    GO_MALGANIS_GATE_2                                     = 187723,
+    GO_EXIT_GATE                                           = 191788,
+    GO_MALGANIS_CHEST_N                                    = 190663,
+    GO_MALGANIS_CHEST_H                                    = 193597
 };
 
 enum KillCredit
@@ -83,10 +82,15 @@ enum WorldStatesCoS
     WORLDSTATE_NUMBER_INFINITE_TIMER            = 3931,
     WORLDSTATE_NUMBER_INFINITE_SHOW             = 3932
 };
-
-enum CrateSpells
+enum AchievementControl
 {
-    SPELL_CRATES_CREDIT     = 58109,
+    ACHI_IS_NOT_STARTED = 1,
+    ACHI_START,
+    ACHI_IS_IN_PROGRESS,
+    ACHI_COMPLETED,
+    ACHI_FAILED,
+    ACHI_RESET,
+    ACHI_INCREASE,
 };
 
 #endif

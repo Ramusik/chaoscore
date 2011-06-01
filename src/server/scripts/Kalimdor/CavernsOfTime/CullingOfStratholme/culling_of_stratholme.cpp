@@ -114,7 +114,6 @@ enum Spells
     SPELL_EXORCISM_N                           = 52445,
     SPELL_EXORCISM_H                           = 58822,
     SPELL_HOLY_LIGHT                           = 52444,
-    SPELL_ARCANE_DISRUPTION                    = 49590,
 };
 
 enum GossipMenuArthas
@@ -126,7 +125,7 @@ enum GossipMenuArthas
    GOSSIP_MENU_ARTHAS_5                        = 100005
 };
 
-enum EncounterData
+enum
 {
     ENCOUNTER_WAVES_NUMBER                      = 8,
     ENCOUNTER_WAVES_MAX_SPAWNS                  = 5,
@@ -510,6 +509,8 @@ public:
                             break;
                         //After waypoint 0
                         case 1:
+                            if (pInstance)
+                                pInstance->SetData(DATA_ARTHAS_EVENT, IN_PROGRESS);
                             me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             if (Unit* pUther = me->SummonCreature(NPC_UTHER,1794.357f,1272.183f,140.558f,1.37f,TEMPSUMMON_DEAD_DESPAWN,180000))
                             {
@@ -1330,10 +1331,6 @@ public:
 
                             if (pAI)
                             {
-                                if (pInstance->GetData(DATA_ARTHAS_EVENT) != NOT_STARTED)
-                                    return false;
-
-                                pInstance->SetData(DATA_ARTHAS_EVENT, IN_PROGRESS);
                                 pAI->Start(true,true,pPlayer->GetGUID(),0,false,false);
                                 pAI->SetDespawnAtFar(false);
                                 pAI->SetDespawnAtEnd(false);
@@ -1391,13 +1388,39 @@ public:
     };
 };
 
-
+	class mob_risen_zombie : public CreatureScript
+	{
+	    public:
+	        mob_risen_zombie() : CreatureScript("mob_risen_zombie") { }
+	
+	    struct mob_risen_zombieAI : public ScriptedAI
+	    {
+	       mob_risen_zombieAI(Creature *c) : ScriptedAI(c)
+	       {
+	           pInstance = me->GetInstanceScript();
+	       }
+	
+	       InstanceScript* pInstance;
+	
+	       void JustDied(Unit *victim)
+	       {
+	           if(pInstance->GetData(DATA_ZOMBIEFEST) == ACHI_IS_NOT_STARTED)
+	               pInstance->SetData(DATA_ZOMBIEFEST, ACHI_START);
+	
+	           pInstance->SetData(DATA_ZOMBIEFEST, ACHI_INCREASE);
+	       }
+	    };
+	
+	    CreatureAI* GetAI(Creature* pCreature) const
+	    {
+	        return new mob_risen_zombieAI (pCreature);
+	    };
+	};
+	
 void AddSC_culling_of_stratholme()
 {
     new npc_arthas();
+    new mob_risen_zombie();
     new npc_cos_chromie();
-    //UPDATE creature_template SET scriptname = 'npc_cos_chromie' where entry in (27915,26527);
     new npc_cos_arcane_disruptor_target();
-    //UPDATE creature_template SET scriptname = 'npc_cos_arcane_disruptor_target' where entry = 30996;
-
 }
