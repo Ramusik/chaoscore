@@ -154,7 +154,7 @@ const uint32 SPELL_ARENA_SECONDARY_H[]          = {15578, 38313, 62529, 0, 62418
 #define SPELL_CHARGE                            32323
 #define SPELL_RUNIC_MENDING                     RAID_MODE(62328, 62446)
 
-#define GO_LEVER                                194264
+#define GO_LEVER                                194265
 
 // Runic Colossus (Mini Boss) Spells
 enum RunicSpells
@@ -313,10 +313,7 @@ public:
                 me->SummonCreature(preAddLocations[i].entry,preAddLocations[i].x,preAddLocations[i].y,preAddLocations[i].z,preAddLocations[i].o,TEMPSUMMON_CORPSE_TIMED_DESPAWN,3000);
 
             if (GameObject* go = me->FindNearestGameObject(GO_LEVER, 500))
-            {
-                //go->SetGoState(GO_STATE_ACTIVE);
-                go->SetLootState(GO_NOT_READY);
-            }
+                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
         }
 
         void KilledUnit(Unit * /*victim*/)
@@ -370,10 +367,7 @@ public:
 
             
             if (GameObject* go = me->FindNearestGameObject(GO_LEVER, 500))
-            {
-                //go->SetGoState(GO_STATE_READY);
-                go->SetLootState(GO_JUST_DEACTIVATED);
-            }
+                go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
         }
 
         void UpdateAI(const uint32 diff)
@@ -400,9 +394,7 @@ public:
                     switch (eventId)
                     {
                         case EVENT_STORMHAMMER:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80, true))
-                                if (target->isAlive() && IN_ARENA(target))
-                                    DoCast(target, SPELL_STORMHAMMER);
+                            DoCast(SPELL_STORMHAMMER);
                             events.ScheduleEvent(EVENT_STORMHAMMER, urand(15000, 20000), 0, PHASE_1);
                             break;
                         case EVENT_CHARGE_ORB:
@@ -869,7 +861,6 @@ public:
 
 };
 
-
 class npc_ancient_rune_giant : public CreatureScript
 {
 public:
@@ -955,7 +946,6 @@ public:
 
 };
 
-
 class npc_sif : public CreatureScript
 {
 public:
@@ -1028,7 +1018,63 @@ public:
             else NovaTimer -= diff;
         }
     };
+};
 
+class NotInArenaCheck
+{
+    public:
+        bool operator() (Unit* unit)
+        {
+            return !IN_ARENA(unit);
+        }
+};
+
+class spell_stormhammer_targeting : public SpellScriptLoader
+{
+    public:
+        spell_stormhammer_targeting() : SpellScriptLoader("spell_stormhammer_targeting") { }
+
+        class spell_stormhammer_targeting_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_stormhammer_targeting_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                _target = NULL;
+                unitList.remove_if(NotInArenaCheck());
+
+                if (unitList.empty())
+                    return;
+
+                std::list<Unit*>::iterator itr = unitList.begin();
+                std::advance(itr, urand(0, unitList.size() - 1));
+                _target = *itr;
+                unitList.clear();
+                unitList.push_back(_target);
+            }
+
+            void SetTarget(std::list<Unit*>& unitList)
+            {
+                unitList.clear();
+
+                if (_target)
+                    unitList.push_back(_target);
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_stormhammer_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_stormhammer_targeting_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_stormhammer_targeting_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_AREA_ENEMY_SRC);
+            }
+
+            Unit* _target;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_stormhammer_targeting_SpellScript();
+        }
 };
 
 /*
@@ -1054,7 +1100,7 @@ INSERT INTO `gameobject_scripts` (`id`, `delay`, `command`, `datalong`, `datalon
 (55194, 0, 11, 34155, 15, '0', 0, 0, 0, 0);
 DELETE FROM `gameobject_template` WHERE `entry`=194265;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `ScriptName`, `WDBVerified`) VALUES
-('194265','1','295','Lever','','','','35','32','3','0','0','0','0','0','0','0','0','6000','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0');
+('194265','1','295','Lever','','','','35','48','3','0','0','0','0','0','0','0','0','6000','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0');
 UPDATE `gameobject` SET `id` = 194265, `rotation2` = 1, `rotation3` = 0, `spawntimesecs` = 7200, `animprogress` = 100 WHERE `guid` = 55194;
 
 -- Cleanup
@@ -1093,4 +1139,5 @@ void AddSC_boss_thorim()
     new npc_runic_colossus();
     new npc_ancient_rune_giant();
     new npc_sif();
+    new spell_stormhammer_targeting();
 }

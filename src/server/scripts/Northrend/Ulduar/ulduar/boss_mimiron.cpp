@@ -95,7 +95,7 @@ enum eSpells
     SPELL_SIREN                                 = 64616,
 
     // NPCs
-    SPELL_BOMB_BOT                              = 63767,
+    SPELL_BOMB_BOT                              = 63801  // should be 63767
 };
 
 enum eEvents
@@ -1128,13 +1128,13 @@ public:
                     if (Creature* leviathan = me->GetVehicleCreatureBase())
                     {
                         float orient = leviathan->GetOrientation();
-                        leviathan->SetFacing(orient + (direction ? M_PI/30 : -M_PI/30));
-                        me->SetOrientation(orient + (direction ? M_PI/30 : -M_PI/30));
+                        leviathan->SetFacing(orient + (direction ? M_PI/60 : -M_PI/60));
+                        me->SetOrientation(orient + (direction ? M_PI/60 : -M_PI/60));
                     }
                     else
                     {
                         float orient = me->GetOrientation();
-                        me->SetFacing(orient + (direction ? M_PI/30 : -M_PI/30));
+                        me->SetFacing(orient + (direction ? M_PI/60 : -M_PI/60));
                     }
                     spinTimer = 250;
                 }
@@ -1196,7 +1196,7 @@ public:
                         case EVENT_HAND_PULSE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                                 DoCast(target, SPELL_HAND_PULSE);
-                            events.RescheduleEvent(EVENT_HAND_PULSE, urand(5000, 8000));
+                            events.RescheduleEvent(EVENT_HAND_PULSE, urand(4000, 5000));
                             break;
                         case EVENT_FROST_BOMB:
                             me->SummonCreature(NPC_FROST_BOMB, SummonPos[rand()%9], TEMPSUMMON_TIMED_DESPAWN, 11000);
@@ -1347,6 +1347,8 @@ public:
                     DoZoneInCombat();
                     break;
                 case DO_DISABLE_AERIAL:
+                    if (phase != PHASE_AERIAL_SOLO)
+                        return;
                     me->CastStop();
                     me->SetReactState(REACT_PASSIVE);
                     me->GetMotionMaster()->Clear(true);
@@ -1625,7 +1627,7 @@ public:
 
     struct mob_mimiron_bomb_botAI : public ScriptedAI
     {
-        mob_mimiron_bomb_botAI(Creature* creature) : ScriptedAI(creature) {}
+        mob_mimiron_bomb_botAI(Creature* creature) : ScriptedAI(creature) { }
 
         Unit* SelectPlayerTargetInRange(float range)
         {
@@ -1636,12 +1638,21 @@ public:
             return target;
         }
 
+        bool despawn;
+
         void Reset()
         {
+            despawn = false;
             if (Unit* target = SelectPlayerTargetInRange(500.0f))
+            {
+                me->AddThreat(target, 999999.0f);
                 AttackStart(target);
+            }
+        }
 
-            me->CastSpell(me, SPELL_BOMB_BOT, true);
+        void JustDied(Unit * /*killer*/)
+        {
+            DoCast(me, SPELL_BOMB_BOT, true);
         }
 
         void UpdateAI(const uint32 /*diff*/)
@@ -1649,7 +1660,12 @@ public:
             if (!UpdateVictim())
                 return;
 
-            //DoMeleeAttackIfReady();
+            if (!despawn && me->IsWithinMeleeRange(me->getVictim()))
+            {
+                despawn = true;
+                DoCast(me, SPELL_BOMB_BOT, true);
+                me->ForcedDespawn(500);
+            }
         }
     };
 };

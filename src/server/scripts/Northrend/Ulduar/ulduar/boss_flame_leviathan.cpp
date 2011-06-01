@@ -1307,6 +1307,7 @@ class at_RX_214_repair_o_matic_station : public AreaTriggerScript
                 {
                     player->MonsterTextEmote(EMOTE_REPAIR, player->GetGUID(), true);
                     player->CastSpell(vehicle, SPELL_AUTO_REPAIR, true);
+                    vehicle->SetFullHealth();
                     if (Creature* leviathan = ObjectAccessor::GetCreature(*player, instance ? instance->GetData64(TYPE_LEVIATHAN) : 0))
                         leviathan->AI()->SetData(DATA_UNBROKEN, 0); // set bool to false thats checked in leviathan getdata
                 }

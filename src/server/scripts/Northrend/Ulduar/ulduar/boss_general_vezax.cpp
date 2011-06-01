@@ -66,7 +66,7 @@ enum Spells
     SPELL_SARONIT_VARPOR                        = 63323, // Casted on Death trigger 63322
     SPELL_SARONIT_VARPOR_AURA                   = 63322, // Unknown Aura Dummy needs Scripting ?
     // Player Shaman
-    SPELL_SHAMANTIC_RAGE                         = 30823,
+    SPELL_SHAMANTIC_RAGE                        = 30823,
 };
 
 enum NPCs
@@ -94,7 +94,7 @@ public:
 
     struct boss_general_vezaxAI : public ScriptedAI
     {
-        boss_general_vezaxAI(Creature *c) : ScriptedAI(c)
+        boss_general_vezaxAI(Creature* c) : ScriptedAI(c)
         {
             m_pInstance = c->GetInstanceScript();
             VarporList = std::list<uint64>();
@@ -140,10 +140,8 @@ public:
             uiMarkOfTheFaceless = urand(15000,25000);
             uiResetImmunity_Timer = 0;
 
-            if(m_pInstance)
-                m_pInstance->SetBossState(TYPE_VEZAX,NOT_STARTED);
-
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            if (m_pInstance)
+                m_pInstance->SetBossState(TYPE_VEZAX, NOT_STARTED);
         }
 
         void DespawnVarpors()
@@ -176,8 +174,8 @@ public:
             DoCast(SPELL_AURA_OF_DESPAIR);
             DoScriptText(SAY_AGGRO,me);
 
-            if(m_pInstance)
-                m_pInstance->SetBossState(TYPE_VEZAX,IN_PROGRESS);
+            if (m_pInstance)
+                m_pInstance->SetBossState(TYPE_VEZAX, IN_PROGRESS);
         }
 
         void SpellHitTarget(Unit* target, const SpellEntry* spell)
@@ -228,18 +226,18 @@ public:
 
             if(!VarporKilled && AnimusSummoned && AnimusKilled)
             {
-                if(m_pInstance)
-                    m_pInstance->DoCompleteAchievement(RAID_MODE(ACHIEVEMENTS_SMELL_OF_SARONIT_IN_THE_MORNING_10,ACHIEVEMENTS_SMELL_OF_SARONIT_IN_THE_MORNING_25));
+                if (m_pInstance)
+                    m_pInstance->DoCompleteAchievement(RAID_MODE(ACHIEVEMENTS_SMELL_OF_SARONIT_IN_THE_MORNING_10, ACHIEVEMENTS_SMELL_OF_SARONIT_IN_THE_MORNING_25));
             }
 
             if(!HitByShadowCrash)
             {
-                if(m_pInstance)
-                    m_pInstance->DoCompleteAchievement(RAID_MODE(ACHIEVEMENTS_SHADOWDODGER_10,ACHIEVEMENTS_SHADOWDODGER_25));
+                if (m_pInstance)
+                    m_pInstance->DoCompleteAchievement(RAID_MODE(ACHIEVEMENTS_SHADOWDODGER_10, ACHIEVEMENTS_SHADOWDODGER_25));
             }
 
-            if(m_pInstance)
-                m_pInstance->SetBossState(TYPE_VEZAX,DONE);
+            if (m_pInstance)
+                m_pInstance->SetBossState(TYPE_VEZAX, DONE);
         }
 
         void DoAction(const int32 action)
@@ -330,8 +328,8 @@ public:
                 {
                     if(!me->IsNonMeleeSpellCasted(false))
                     {
-                         DoCast(SPELL_SEARING_FLAMES);
                          me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                         DoCast(SPELL_SEARING_FLAMES);
                          uiSearingFlames_Timer = urand(10000,15000);
                          ImmunityToReset = true;
                          uiResetImmunity_Timer = 2000;
@@ -355,7 +353,7 @@ public:
                     else if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true))
                         DoCast(target,SPELL_MARK_OF_THE_FACELESS,false);
 
-                        uiMarkOfTheFaceless = urand(15000,25000);
+                    uiMarkOfTheFaceless = urand(15000,25000);
                 }
             }else uiMarkOfTheFaceless -= diff;
 
