@@ -3697,6 +3697,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetB[0] = TARGET_DST_NEARBY_ENTRY;
             ++count;
             break;
+        case 46841: // Escape to the Isle of Quel'Danas
+            // not sure why this is needed
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_DST_DB;
+            ++count;
+            break;
         case 26029: // Dark Glare
         case 37433: // Spout
         case 43140: case 43215: // Flame Breath
