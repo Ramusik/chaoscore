@@ -22,40 +22,104 @@
 #include "Spell.h"
 
 #define GOSSIP_SENDER_ICC_PORT 631
+#define GOSSIP_TEXT(id) sObjectMgr->GetGossipText(id)->Options[0].Text_0
+#define IS_TELEPORT_ENABLED(id) ((go->GetMap()->GetGameObject(instance->GetData64(id))->GetGoState() == GO_STATE_ACTIVE) ? true: false)
 
-class icecrown_citadel_teleport : public GameObjectScript
+enum eTeleportGossips
 {
-    public:
-        icecrown_citadel_teleport() : GameObjectScript("icecrown_citadel_teleport") { }
+    GOSSIP_TELEPORT_LIGHTS_HAMMER           = 800000,
+    GOSSIP_TELEPORT_ORATORY_OF_THE_DAMNED   = 800001,
+    GOSSIP_TELEPORT_RAMPART_OF_SKULLS       = 800002,
+    GOSSIP_TELEPORT_DEATHBRINGERS_RISE      = 800003,
+    GOSSIP_TELEPORT_UPPER_SPIRE             = 800004,
+    GOSSIP_TELEPORT_SINDRAGOSAS_LAIR        = 800005,
+    GOSSIP_TELEPORT_FROZEN_THRONE           = 800006
+};
 
-        bool OnGossipHello(Player* player, GameObject* go)
+enum TeleportSpells
+{
+    SPELL_TELEPORT_ICC_LIGHT_S_HAMMER         = 70781,
+    SPELL_TELEPORT_ICC_ORATORY_OF_THE_DAMNED  = 70856,
+    SPELL_TELEPORT_ICC_RAMPART_OF_SKULLS      = 70857,
+    SPELL_TELEPORT_ICC_DEATHBRINGER_S_RISE    = 70858,
+    SPELL_TELEPORT_ICC_UPPER_SPIRE            = 70859,
+    SPELL_TELEPORT_ICC_SINDRAGOSA_S_LAIR      = 70861,
+    SPELL_TELEPORT_ICC_FROZEN_THRONE          = 70860
+};
+
+class go_icecrown_teleporter : public GameObjectScript
+{
+
+public:
+    go_icecrown_teleporter() : GameObjectScript("go_icecrown_teleporter") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        InstanceScript* instance = go->GetInstanceScript();
+        if(!instance)
+            return false;
+        if (instance->IsEncounterInProgress())
+            return false;
+
+        switch (go->GetEntry())
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to Light's Hammer.", GOSSIP_SENDER_ICC_PORT, LIGHT_S_HAMMER_TELEPORT);
-            if (InstanceScript* instance = go->GetInstanceScript())
-            {
-                if (instance->GetBossState(DATA_LORD_MARROWGAR) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Oratory of the Damned.", GOSSIP_SENDER_ICC_PORT, ORATORY_OF_THE_DAMNED_TELEPORT);
-                if (instance->GetBossState(DATA_LADY_DEATHWHISPER) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Rampart of Skulls.", GOSSIP_SENDER_ICC_PORT, RAMPART_OF_SKULLS_TELEPORT);
-                if (instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Deathbringer's Rise.", GOSSIP_SENDER_ICC_PORT, DEATHBRINGER_S_RISE_TELEPORT);
-                if (instance->GetData(DATA_COLDFLAME_JETS) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Upper Spire.", GOSSIP_SENDER_ICC_PORT, UPPER_SPIRE_TELEPORT);
-                if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to Sindragosa's Lair", GOSSIP_SENDER_ICC_PORT, SINDRAGOSA_S_LAIR_TELEPORT);
-                if (instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE && instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && instance->GetBossState(DATA_SINDRAGOSA) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to The Frozen Throne", GOSSIP_SENDER_ICC_PORT, FROZEN_THRONE_TELEPORT);
-            }
-
-            player->SEND_GOSSIP_MENU(player->GetGossipTextId(go->GetGOInfo()->GetGossipMenuId()), go->GetGUID());
-            return true;
+            case GO_TELEPORT_ORATORY_OF_THE_DAMNED:
+                instance->SetData(DATA_TELEPORT_ORATORY_OF_THE_DAMNED_ACTIVATED, DONE);
+                break;
+            case GO_TELEPORT_RAMPART_OF_SKULLS:
+                instance->SetData(DATA_TELEPORT_RAMPART_OF_SKULLS_ACTIVATED, DONE);
+                instance->SetData(DATA_TELEPORT_DEATHBRINGER_S_RISE_ACTIVATED, DONE);
+                break;
+            case GO_TELEPORT_DEATHBRINGER_RISE:
+                instance->SetData(DATA_TELEPORT_DEATHBRINGER_S_RISE_ACTIVATED, DONE);
+                break;
+            case GO_TELEPORT_UPPER_SPIRE:
+                instance->SetData(DATA_TELEPORT_UPPER_SPIRE_ACTIVATED, DONE);
+                break;
+            case GO_TELEPORT_SINDRAGOSA_S_LAIR:
+                instance->SetData(DATA_TELEPORT_SINDRAGOSA_S_LAIR_ACTIVATED, DONE);
+                break;
+            case GO_TELEPORT_FROZEN_THRONE:
+                instance->SetData(DATA_TELEPORT_FROZEN_THRONE_ACTIVATED, DONE);
+                break;
         }
+        instance->HandleGameObject(NULL, true, go);
+        if (go->GetEntry() != GO_TELEPORT_LIGHT_S_HAMMER)
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT(GOSSIP_TELEPORT_LIGHTS_HAMMER), GOSSIP_SENDER_MAIN, SPELL_TELEPORT_ICC_LIGHT_S_HAMMER);
 
-        bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 sender, uint32 action)
+        if (go->GetEntry() != GO_TELEPORT_ORATORY_OF_THE_DAMNED && instance->GetData(DATA_LORD_MARROWGAR) == DONE && instance->GetData(DATA_TELEPORT_ORATORY_OF_THE_DAMNED_ACTIVATED) == DONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT(GOSSIP_TELEPORT_ORATORY_OF_THE_DAMNED), GOSSIP_SENDER_MAIN, SPELL_TELEPORT_ICC_ORATORY_OF_THE_DAMNED);
+        if (go->GetEntry() != GO_TELEPORT_RAMPART_OF_SKULLS && instance->GetData(DATA_LADY_DEATHWHISPER) == DONE && instance->GetData(DATA_TELEPORT_RAMPART_OF_SKULLS_ACTIVATED) == DONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT(GOSSIP_TELEPORT_RAMPART_OF_SKULLS), GOSSIP_SENDER_MAIN, SPELL_TELEPORT_ICC_RAMPART_OF_SKULLS);
+        if (go->GetEntry() != GO_TELEPORT_DEATHBRINGER_RISE
+            && instance->GetData(DATA_GUNSHIP_EVENT) == DONE
+            && instance->GetData(DATA_LADY_DEATHWHISPER) == DONE
+            && instance->GetData(DATA_TELEPORT_DEATHBRINGER_S_RISE_ACTIVATED) == DONE
+                        //&& IS_TELEPORT_ENABLED(DATA_TELEPORT_DEATHBRINGERS_RISE) //Disabled until Gunship Battle encounter is implemented
+            )
         {
-            player->PlayerTalkClass->ClearMenus();
-            player->CLOSE_GOSSIP_MENU();
-            SpellEntry const* spell = sSpellStore.LookupEntry(action);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT(GOSSIP_TELEPORT_DEATHBRINGERS_RISE), GOSSIP_SENDER_MAIN, SPELL_TELEPORT_ICC_DEATHBRINGER_S_RISE);
+        }
+        if (go->GetEntry() != GO_TELEPORT_UPPER_SPIRE &&
+            instance->GetData(DATA_DEATHBRINGER_SAURFANG) == DONE && instance->GetData(DATA_TELEPORT_UPPER_SPIRE_ACTIVATED) == DONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT(GOSSIP_TELEPORT_UPPER_SPIRE), GOSSIP_SENDER_MAIN, SPELL_TELEPORT_ICC_UPPER_SPIRE);
+        if (go->GetEntry() != GO_TELEPORT_SINDRAGOSA_S_LAIR &&
+            instance->GetData(DATA_VALITHRIA_DREAMWALKER) == DONE && instance->GetData(DATA_TELEPORT_SINDRAGOSA_S_LAIR_ACTIVATED) == DONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT(GOSSIP_TELEPORT_SINDRAGOSAS_LAIR), GOSSIP_SENDER_MAIN, SPELL_TELEPORT_ICC_SINDRAGOSA_S_LAIR);
+        if (instance->GetData(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && instance->GetData(DATA_PROFESSOR_PUTRICIDE) == DONE && instance->GetData(DATA_SINDRAGOSA) == DONE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT(GOSSIP_TELEPORT_FROZEN_THRONE), GOSSIP_SENDER_MAIN, SPELL_TELEPORT_ICC_FROZEN_THRONE);
+
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, go->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 uiSender, uint32 uiAction)
+        {
+            //player->PlayerTalkClass->ClearMenus();
+            if(!player->getAttackers().empty())
+                return false;
+
+            SpellEntry const* spell = sSpellStore.LookupEntry(uiAction);
             if (!spell)
                 return false;
 
@@ -65,14 +129,22 @@ class icecrown_citadel_teleport : public GameObjectScript
                 return true;
             }
 
-            if (sender == GOSSIP_SENDER_ICC_PORT)
+            if (uiSender == GOSSIP_SENDER_MAIN)
+            {
+                //Preload the Lich King's platform before teleporting player to there
+                if (uiAction == SPELL_TELEPORT_ICC_FROZEN_THRONE)
+                    player->GetMap()->LoadGrid(530.3f, -2122.67f);
                 player->CastSpell(player, spell, true);
-
+                //Give him 2 tries, just in case if player will fall through the ground
+                if (uiAction == SPELL_TELEPORT_ICC_FROZEN_THRONE)
+                    TeleportPlayerToFrozenThrone(player);
+            }
             return true;
         }
 };
 
+
 void AddSC_icecrown_citadel_teleport()
 {
-    new icecrown_citadel_teleport();
+    new go_icecrown_teleporter();
 }

@@ -299,6 +299,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 _fallenChampionCastCount = 0;
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                 instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, IN_PROGRESS);
+                instance->SetData(DATA_DEATHBRINGER_SAURFANG, IN_PROGRESS);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -310,6 +311,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                 if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
                     creature->AI()->DoAction(ACTION_START_OUTRO);
+                instance->SetData(DATA_DEATHBRINGER_SAURFANG, DONE);
             }
 
             void AttackStart(Unit* victim)
@@ -331,6 +333,7 @@ class boss_deathbringer_saurfang : public CreatureScript
             {
                 _JustReachedHome();
                 instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, FAIL);
+                instance->SetData(DATA_DEATHBRINGER_SAURFANG, FAIL);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
             }
 
@@ -494,7 +497,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     case PHASE_INTRO_A:
                     case PHASE_INTRO_H:
                     {
-                        if (GameObject* teleporter = GameObject::GetGameObject(*me, instance->GetData64(GO_SCOURGE_TRANSPORTER_SAURFANG)))
+                        if (GameObject* teleporter = GameObject::GetGameObject(*me, instance->GetData64(GO_TELEPORT_RAMPART_OF_SKULLS)))
                         {
                             instance->HandleGameObject(0, false, teleporter);
                             teleporter->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);

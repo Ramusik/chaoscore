@@ -181,6 +181,7 @@ class boss_professor_putricide : public CreatureScript
             {
                 if (!(events.GetPhaseMask() & PHASE_MASK_NOT_SELF))
                     instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, NOT_STARTED);
+                    instance->SetData(DATA_PROFESSOR_PUTRICIDE, NOT_STARTED);
                 instance->SetData(DATA_NAUSEA_ACHIEVEMENT, uint32(true));
 
                 events.Reset();
@@ -222,6 +223,7 @@ class boss_professor_putricide : public CreatureScript
                 DoZoneInCombat(me);
 
                 instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, IN_PROGRESS);
+                instance->SetData(DATA_PROFESSOR_PUTRICIDE, IN_PROGRESS);
             }
 
             void JustReachedHome()
@@ -230,6 +232,7 @@ class boss_professor_putricide : public CreatureScript
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                 if (events.GetPhaseMask() & PHASE_MASK_COMBAT)
                     instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, FAIL);
+                    instance->SetData(DATA_PROFESSOR_PUTRICIDE, FAIL);
             }
 
             void KilledUnit(Unit* victim)
@@ -242,6 +245,8 @@ class boss_professor_putricide : public CreatureScript
             {
                 _JustDied();
                 Talk(SAY_DEATH);
+                instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, DONE);
+                instance->SetData(DATA_PROFESSOR_PUTRICIDE, DONE);
             }
 
             void JustSummoned(Creature* summon)

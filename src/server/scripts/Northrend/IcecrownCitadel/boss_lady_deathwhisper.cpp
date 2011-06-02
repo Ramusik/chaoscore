@@ -294,11 +294,15 @@ class boss_lady_deathwhisper : public CreatureScript
                 DoCast(me, SPELL_MANA_BARRIER, true);
 
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, IN_PROGRESS);
+                instance->SetData(DATA_LADY_DEATHWHISPER, IN_PROGRESS); 
             }
 
             void JustDied(Unit* killer)
             {
                 Talk(SAY_DEATH);
+
+                instance->SetBossState(DATA_LADY_DEATHWHISPER, DONE);                
+                instance->SetData(DATA_LADY_DEATHWHISPER, DONE);                
 
                 std::set<uint32> livingAddEntries;
                 // Full House achievement
@@ -341,6 +345,7 @@ class boss_lady_deathwhisper : public CreatureScript
             {
                 _JustReachedHome();
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, FAIL);
+                 instance->SetData(DATA_LADY_DEATHWHISPER, FAIL);
 
                 summons.DespawnAll();
                 if (Creature* darnavan = ObjectAccessor::GetCreature(*me, _darnavanGUID))

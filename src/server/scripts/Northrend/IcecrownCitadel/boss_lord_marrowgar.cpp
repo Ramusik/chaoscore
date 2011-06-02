@@ -113,19 +113,22 @@ class boss_lord_marrowgar : public CreatureScript
                 me->setActive(true);
                 DoZoneInCombat();
                 instance->SetBossState(DATA_LORD_MARROWGAR, IN_PROGRESS);
+                instance->SetData(DATA_LORD_MARROWGAR, IN_PROGRESS);
             }
 
             void JustDied(Unit* /*killer*/)
             {
                 Talk(SAY_DEATH);
-
                 _JustDied();
+                instance->SetBossState(DATA_LORD_MARROWGAR, DONE);
+                instance->SetData(DATA_LORD_MARROWGAR, DONE);
             }
 
             void JustReachedHome()
             {
                 _JustReachedHome();
                 instance->SetBossState(DATA_LORD_MARROWGAR, FAIL);
+                instance->SetData(DATA_LORD_MARROWGAR, FAIL);
                 instance->SetData(DATA_BONED_ACHIEVEMENT, uint32(true));    // reset
             }
 

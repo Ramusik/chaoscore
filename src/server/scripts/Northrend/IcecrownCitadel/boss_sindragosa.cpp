@@ -203,6 +203,8 @@ class boss_sindragosa : public CreatureScript
             {
                 BossAI::JustDied(killer);
                 Talk(SAY_DEATH);
+                instance->SetBossState(DATA_SINDRAGOSA, DONE);
+                instance->SetData(DATA_SINDRAGOSA, DONE);
             }
 
             void EnterCombat(Unit* victim)
@@ -215,6 +217,8 @@ class boss_sindragosa : public CreatureScript
                 }
 
                 BossAI::EnterCombat(victim);
+                instance->SetData(DATA_SINDRAGOSA, IN_PROGRESS);
+                instance->SetBossState(DATA_SINDRAGOSA, IN_PROGRESS);
                 DoCast(me, SPELL_FROST_AURA);
                 DoCast(me, SPELL_PERMAEATING_CHILL);
                 Talk(SAY_AGGRO);
@@ -224,6 +228,7 @@ class boss_sindragosa : public CreatureScript
             {
                 BossAI::JustReachedHome();
                 instance->SetBossState(DATA_SINDRAGOSA, FAIL);
+                instance->SetData(DATA_SINDRAGOSA, FAIL);
                 me->SetFlying(false);
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
             }

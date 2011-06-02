@@ -190,13 +190,11 @@ class boss_blood_council_controller : public CreatureScript
                 _resetCounter = 0;
 
                 instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, NOT_STARTED);
+                instance->SetData(DATA_BLOOD_PRINCE_COUNCIL, NOT_STARTED);
             }
 
             void EnterCombat(Unit* who)
             {
-                if (instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
-                    return;
-
                 if (!instance->CheckRequiredBosses(DATA_BLOOD_PRINCE_COUNCIL, who->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -205,6 +203,7 @@ class boss_blood_council_controller : public CreatureScript
                 }
 
                 instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
+                instance->SetData(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
 
                 DoCast(me, SPELL_INVOCATION_OF_BLOOD_VALANAR);
 
@@ -269,6 +268,8 @@ class boss_blood_council_controller : public CreatureScript
 
             void JustReachedHome()
             {
+                instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, FAIL);
+                instance->SetData(DATA_BLOOD_PRINCE_COUNCIL, FAIL);
                 _resetCounter = 0;
                 if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
                     keleseth->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);

@@ -131,6 +131,8 @@ class boss_festergut : public CreatureScript
             {
                 _JustDied();
                 Talk(SAY_DEATH);
+                instance->SetBossState(DATA_FESTERGUT, DONE);
+                instance->SetData(DATA_FESTERGUT, DONE);
                 if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->DoAction(ACTION_FESTERGUT_DEATH);
 
@@ -141,6 +143,7 @@ class boss_festergut : public CreatureScript
             {
                 _JustReachedHome();
                 instance->SetBossState(DATA_FESTERGUT, FAIL);
+                instance->SetData(DATA_FESTERGUT, FAIL);
             }
 
             void EnterEvadeMode()

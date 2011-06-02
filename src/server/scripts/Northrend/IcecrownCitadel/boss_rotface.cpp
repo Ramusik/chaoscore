@@ -124,6 +124,8 @@ class boss_rotface : public CreatureScript
             {
                 _JustDied();
                 Talk(SAY_DEATH);
+                instance->SetBossState(DATA_ROTFACE, DONE);
+                instance->SetData(DATA_ROTFACE, DONE);
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->DoAction(ACTION_ROTFACE_DEATH);
             }
@@ -132,6 +134,7 @@ class boss_rotface : public CreatureScript
             {
                 _JustReachedHome();
                 instance->SetBossState(DATA_ROTFACE, FAIL);
+                instance->SetData(DATA_ROTFACE, FAIL);
                 instance->SetData(DATA_OOZE_DANCE_ACHIEVEMENT, uint32(true));   // reset
             }
 
