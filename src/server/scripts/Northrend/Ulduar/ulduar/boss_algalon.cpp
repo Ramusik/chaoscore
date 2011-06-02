@@ -29,6 +29,10 @@ enum Spells
     SPELL_COSMIC_SMASH_25           = 64598,
     SPELL_PHASE_PUNCH               = 64412,
     SPELL_PHASE_PUNCH_PHASE         = 64417,
+    SPELL_PHASE_PUNCH_ALPHA_1       = 64435,
+    SPELL_PHASE_PUNCH_ALPHA_2       = 64434,
+    SPELL_PHASE_PUNCH_ALPHA_3       = 64428,
+    SPELL_PHASE_PUNCH_ALPHA_4       = 64421,
     SPELL_QUANTUM_STRIKE_10         = 64395,
     SPELL_QUANTUM_STRIKE_25         = 64592,
     SPELL_BLACK_HOLE_CREDIT         = 65312,
@@ -45,6 +49,7 @@ enum Spells
     SPELL_VOID_ZONE_VISUAL          = 64469,
     SPELL_DUAL_WIELD                = 42459,
     SPELL_BOSS_FINISHED             = 65184,
+    SPELL_REORIGINATION             = 64996
 };
 
 enum Creatures
@@ -85,8 +90,7 @@ enum Yells
 
 enum Events
 {
-    EVENT_NONE,
-    EVENT_ASCEND,
+    EVENT_ASCEND = 1,
     EVENT_BERSERK,
     EVENT_BIGBANG,
     EVENT_COSMICSMASH,
@@ -97,10 +101,9 @@ enum Events
     EVENT_DARKMATTER
 };
 
-static Position Locations[]=
+static Position miscLocations[]=
 {
-    {1632.36f, -310.09f, 417.33f, 0.0f},  // room center
-    {1632.44f, -301.55f, 417.33f, 0.0f},  // azeroth
+    {1624.31f, -297.44f, 417.33f, 0.0f},  // azeroth
     {1632.36f, -310.09f, 385.0f, 0.0f}    // cosmic smash trigger
 };
 
@@ -127,16 +130,16 @@ class boss_algalon : public CreatureScript
 public:
     boss_algalon() : CreatureScript("boss_algalon") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_algalonAI(pCreature);
+        return new boss_algalonAI(creature);
     }
 
     struct boss_algalonAI : public BossAI
     {
         boss_algalonAI(Creature* c) : BossAI(c, TYPE_ALGALON)
         {
-            summon = false;
+            firstTime = true;
 
             // spell gets triggered from caster, should be triggered from destination?
             SpellEntry* tempSpell;
@@ -149,19 +152,25 @@ public:
         uint32 phase;
         uint32 stepTimer;
         uint32 step;
-        bool summon;
+        bool firstTime;
         bool wipeRaid;
 
         void Reset()
         {
             _Reset();
 
-            if (summon)
+            if (firstTime)
+            {
+                me->SummonCreature(CREATURE_AZEROTH, miscLocations[0]);
+                DoCast(SPELL_REORIGINATION);
+            }
+            else
                 me->setFaction(7);
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
 
-            phase = 1;
+            phase = 0;
             stepTimer = 0;
             starCount = 0;
             wipeRaid = false;
@@ -172,23 +181,22 @@ public:
             me->SetStatFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, float(RAID_MODE(18000, 35000)));
         }
 
-        void EnterCombat(Unit* who)
+        void JustReachedHome()
         {
-            _EnterCombat();
-            me->setFaction(14);
+            me->SummonCreature(CREATURE_AZEROTH, miscLocations[0]);
+            DoCast(SPELL_REORIGINATION);
+        }
 
-            if (summon)
-            {
-                me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                DoZoneInCombat();
-                SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
-            }
-            else
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetReactState(REACT_PASSIVE);
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->setFaction(14);
+            DoZoneInCombat();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            if (firstTime)
                 step = 1;
-            }
+            else
+                step = 4;
 
             events.ScheduleEvent(EVENT_BERSERK, 6*MINUTE*IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_BIGBANG, 90*IN_MILLISECONDS);
@@ -205,7 +213,7 @@ public:
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_BOSS_FINISHED);
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
         }
@@ -225,8 +233,8 @@ public:
                 case CREATURE_COLLAPSING_STAR:
                     ++starCount;
                     summon->SetReactState(REACT_PASSIVE);
-                    summon->GetMotionMaster()->MoveRandom(15.0f);
                     summon->SetInCombatWithZone();
+                    summon->GetMotionMaster()->MoveRandom(15.0f);
                     break;
                 case CREATURE_LIVING_CONSTELLATION:
                     summon->SetInCombatWithZone();
@@ -258,13 +266,31 @@ public:
         void SpellHitTarget(Unit* target, const SpellEntry* spell)
         {
             if (spell->Id == SPELL_PHASE_PUNCH)
-                if (Aura* phasePunch = target->GetAura(SPELL_PHASE_PUNCH))
-                    if (phasePunch->GetStackAmount() > 4)
-                    {
+            {
+                uint32 stackAmount = target->GetAuraCount(SPELL_PHASE_PUNCH);
+                switch (stackAmount)
+                {
+                    case 1:
+                        target->CastSpell(target, SPELL_PHASE_PUNCH_ALPHA_1, true);
+                        break;
+                    case 2:
+                        target->CastSpell(target, SPELL_PHASE_PUNCH_ALPHA_2, true);
+                        break;
+                    case 3:
+                        target->CastSpell(target, SPELL_PHASE_PUNCH_ALPHA_3, true);
+                        break;
+                    case 4:
+                        target->CastSpell(target, SPELL_PHASE_PUNCH_ALPHA_4, true);
+                        break;
+                    case 5:
                         target->CastSpell(target, SPELL_PHASE_PUNCH_PHASE, true);
                         target->CombatStop();
                         target->getHostileRefManager().deleteReferences();
-                    }
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         void EnterEvadeMode()
@@ -291,7 +317,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -310,23 +336,17 @@ public:
                     me->SummonCreature(CREATURE_BLACK_HOLE, collapsingLocations[i]);
             }
 
-            if (HealthBelowPct(2))
+            if (phase == 2 && HealthBelowPct(2))
             {
-                me->SummonGameObject(GO_GIFT_OF_THE_OBSERVER, 1634.258667f, -295.101166f,417.321381f,0,0,0,0,0,0);
-
-                // All of them. or random?
-                DoScriptText(SAY_DEATH_1, me);
-                DoScriptText(SAY_DEATH_2, me);
-                DoScriptText(SAY_DEATH_3, me);
-                DoScriptText(SAY_DEATH_4, me);
-                DoScriptText(SAY_DEATH_5, me);
-
-                me->DisappearAndDie();
-                _JustDied();
-                return;
+                summons.DespawnAll();
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_PASSIVE);
+                me->RemoveAllAuras();
+                step = 1;
+                phase = 3;
             }
 
-            if (!summon)
+            if (phase == 0)
             {
                 if (stepTimer <= diff)
                 {
@@ -345,21 +365,70 @@ public:
                             JumpToNextStep(11000);
                             break;
                         case 4:
-                            DoScriptText(SAY_ENGAGED_FOR_FIRST_TIME, me);
-                            JumpToNextStep(11000);
+                            _EnterCombat();
+                            summons.DespawnEntry(CREATURE_AZEROTH);
+                            SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
+                            DoScriptText(SAY_AGGRO, me);
+                            if (!firstTime)
+                                JumpToNextStep(7000);
+                            else
+                                JumpToNextStep(15000);
                             break;
                         case 5:
-                            DoScriptText(SAY_AGGRO, me);
-                            JumpToNextStep(7000);
+                            if (!firstTime)
+                            {
+                                JumpToNextStep(0);
+                                break;
+                            }
+                            DoScriptText(SAY_ENGAGED_FOR_FIRST_TIME, me);
+                            JumpToNextStep(11000);
                             break;
                         case 6:
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             me->SetReactState(REACT_AGGRESSIVE);
-                            SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
-                            summon = true;
+                            firstTime = false;
+                            phase = 1;
                             break;
                     }
                 } else stepTimer -= diff;
+
+                return;
+            }
+
+            if (phase == 3)
+            {
+                if (stepTimer <= diff)
+                {
+                    switch (step)
+                    {
+                        case 1:
+                            me->SummonGameObject(GO_GIFT_OF_THE_OBSERVER, 1634.258667f, -295.101166f, 417.321381f, 0, 0, 0, 0, 0, 0);
+                            _JustDied();
+                            DoScriptText(SAY_DEATH_1, me);
+                            JumpToNextStep(40000);
+                            break;
+                        case 2:
+                            DoScriptText(SAY_DEATH_2, me);
+                            JumpToNextStep(17000);
+                            break;
+                        case 3:
+                            DoScriptText(SAY_DEATH_3, me);
+                            JumpToNextStep(10000);
+                            break;
+                        case 4:
+                            DoScriptText(SAY_DEATH_4, me);
+                            JumpToNextStep(11000);
+                            break;
+                        case 5:
+                            DoScriptText(SAY_DEATH_5, me);
+                            JumpToNextStep(11000);
+                            break;
+                        case 6:
+                            me->DisappearAndDie();
+                            break;
+                    }
+                } else stepTimer -= diff;
+
                 return;
             }
 
@@ -379,15 +448,15 @@ public:
                         events.ScheduleEvent(EVENT_BIGBANG, 90*IN_MILLISECONDS);
                         break;
                     case EVENT_PHASEPUNCH:
-                        DoCast(me->getVictim(), SPELL_PHASE_PUNCH, true);
+                        DoCastVictim(SPELL_PHASE_PUNCH, true);
                         events.ScheduleEvent(EVENT_PHASEPUNCH, 15*IN_MILLISECONDS);
                         break;
                     case EVENT_QUANTUMSTRIKE:
-                        DoCast(me->getVictim(), RAID_MODE(SPELL_QUANTUM_STRIKE_10, SPELL_QUANTUM_STRIKE_25));
+                        DoCastVictim(RAID_MODE(SPELL_QUANTUM_STRIKE_10, SPELL_QUANTUM_STRIKE_25));
                         events.ScheduleEvent(EVENT_QUANTUMSTRIKE, urand(4*IN_MILLISECONDS, 14*IN_MILLISECONDS));
                         break;
                     case EVENT_COSMICSMASH:
-                        DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), RAID_MODE(SPELL_COSMIC_SMASH_10, SPELL_COSMIC_SMASH_25));
+                        DoCast(RAID_MODE(SPELL_COSMIC_SMASH_10, SPELL_COSMIC_SMASH_25));
                         events.ScheduleEvent(EVENT_COSMICSMASH, 25*IN_MILLISECONDS);
                         break;
                     case EVENT_COLLAPSINGSTAR:
@@ -447,13 +516,16 @@ public:
             loseHealthTimer = 1*IN_MILLISECONDS;
         }
 
-        void JustDied(Unit * /*killer*/)
+        void AttackStart(Unit* /*target*/) { }
+        void MoveInLineOfSight(Unit* /*who*/) { }
+
+        void JustDied(Unit* /*killer*/)
         {
-            DoCast(SPELL_BLACK_HOLE_CREDIT);
+            DoCast(me, SPELL_BLACK_HOLE_CREDIT, true);
             DoCast(me, RAID_MODE(SPELL_BLACK_HOLE_EXPLOSION_10, SPELL_BLACK_HOLE_EXPLOSION_25), true);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (loseHealthTimer <= diff)
             {
@@ -502,12 +574,12 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (arcaneBarrageTimer <= diff)
             {
                 DoCast(RAID_MODE(SPELL_ARCANE_BARAGE_10, SPELL_ARCANE_BARAGE_25));
-                arcaneBarrageTimer = 5*IN_MILLISECONDS;
+                arcaneBarrageTimer = urand(5*IN_MILLISECONDS, 8*IN_MILLISECONDS);
             } else arcaneBarrageTimer -= diff;
         }
     };
@@ -615,7 +687,7 @@ class spell_cosmic_smash_summon_trigger : public SpellScriptLoader
             void HandleScript(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                GetCaster()->SummonCreature(CREATURE_COSMIC_SMASH_TRIGGER, Locations[2], TEMPSUMMON_TIMED_DESPAWN, 7900);
+                GetCaster()->SummonCreature(CREATURE_COSMIC_SMASH_TRIGGER, miscLocations[1], TEMPSUMMON_TIMED_DESPAWN, 7900);
             }
 
             void Register()
@@ -705,7 +777,7 @@ class spell_cosmic_smash_missile_target : public SpellScriptLoader
 
             void FilterTarget(std::list<Unit*>& unitList)
             {
-                for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end(); ++itr)
+                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                 {
                     if ((*itr)->isAlive())
                         (*itr)->Kill(*itr);
@@ -724,6 +796,46 @@ class spell_cosmic_smash_missile_target : public SpellScriptLoader
         }
 };
 
+class spell_remove_player_from_phase : public SpellScriptLoader
+{
+    public:
+        spell_remove_player_from_phase() : SpellScriptLoader("spell_remove_player_from_phase") { }
+
+        class spell_remove_player_from_phaseScript : public AuraScript
+        {
+            PrepareAuraScript(spell_remove_player_from_phaseScript);
+
+            bool Validate(SpellEntry const* /*spellInfo*/)
+            {
+                if (!sSpellStore.LookupEntry(SPELL_BLACK_HOLE_PHASE))
+                    return false;
+                if (!sSpellStore.LookupEntry(SPELL_PHASE_PUNCH_PHASE))
+                    return false;
+                return true;
+            }
+
+            void HandlePeriodicTick(AuraEffect const* /*aurEff*/)
+            {
+                PreventDefaultAction();
+                if (InstanceScript* _instance = GetUnitOwner()->GetInstanceScript())
+                {
+                    _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLACK_HOLE_PHASE);
+                    _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_PHASE_PUNCH_PHASE);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_remove_player_from_phaseScript::HandlePeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_remove_player_from_phaseScript();
+        }
+};
+
 void AddSC_boss_algalon()
 {
     new boss_algalon();
@@ -736,4 +848,5 @@ void AddSC_boss_algalon()
     new spell_cosmic_smash_summon_target();
     new spell_cosmic_smash_dmg();
     new spell_cosmic_smash_missile_target();
+    new spell_remove_player_from_phase();
 }

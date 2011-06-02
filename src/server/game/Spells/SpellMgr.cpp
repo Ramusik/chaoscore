@@ -4054,10 +4054,28 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         // ULDUAR SPELLS
         //
-
+        case 62016: // Thorim - Charge Orb
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_LOS;
+            spellInfo->MaxAffectedTargets = 1;
+            ++count;
+            break;
+        case 62039: // Hodir - Biting Cold - Remove on Move
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_MOVE;
+            ++count;
+            break;
+        case 62775: // XT-002 - Tympanic Tantrum
+        case 64443: // Algalon - Big Bang
+        case 64584: // Algalon - Big Bang
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+            ++count;
+            break;
          case 65210: // Keeper Mimiron Destabilization Matrix
-             // Ignore LoS (because Mimiron stands in a Tube and is out of LoS)
-             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_LOS;
+        case 65210: // Keeper Mimiron Destabilization Matrix - Ignore LoS (because Mimiron stands in a Tube and is out of LoS)
+        case 62042: // Thorim - Stormhammer
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_LOS;
+            ++count;
+            break;
+        case 62488: // Ignis Activate Construct (only visually)
         case 63024: // XT-002 Gravity Bomb
         case 64234: // XT-002 Gravity Bomb
         case 63018: // XT-002 Searing Light
@@ -4069,10 +4087,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             ++count;
             break;
-         case 63802: // Sara Brain Link
-             spellInfo->MaxAffectedTargets = 2;
-             count++;
-             break;
+        case 63802: // Sara Brain Link
+            spellInfo->MaxAffectedTargets = 2;
+            ++count;
+            break;
         case 62716: // Growth of Nature
         case 65584: // Growth of Nature
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
