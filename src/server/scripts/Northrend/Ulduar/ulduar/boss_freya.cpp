@@ -101,7 +101,7 @@ enum Archievments
 enum Spells
 {
     // Freya
-    SPELL_BERSERK                               = 82395,
+    SPELL_BERSERK                               = 47008,
     SPELL_TOUCH_OF_EONAR_10                     = 62528,
     SPELL_TOUCH_OF_EONAR_25                     = 62892,
     SPELL_ATTUNED_TO_NATURE                     = 62519,
@@ -497,6 +497,7 @@ public:
             me->AI()->EnterEvadeMode();
             // cast is not rewarding the achievement.
             // DoCast(SPELL_ACHIEVEMENT_CHECK);
+			me->ForcedDespawn(5000);
             pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_ACHIEVEMENT_CHECK);
         }
 
@@ -590,10 +591,10 @@ public:
                 }else uiNaturalBomb_Timer -= diff;
             }
 
-            if(Berserk_Timer <= diff)
+            if (Berserk_Timer <= diff)
             {
-                if(!me->HasAura(SPELL_BERSERK))
-                    DoCast(me,SPELL_BERSERK,true);
+                if (!me->HasAura(SPELL_BERSERK))
+                    DoCast(me, SPELL_BERSERK, true);
             } else Berserk_Timer -= diff;
 
             //Hardmode Elder Stonebark
@@ -808,7 +809,6 @@ public:
         mob_detonating_lasherAI(Creature* creature) : ScriptedAI(creature)
         {
             m_pInstance = creature->GetInstanceScript();
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
         }
 
         InstanceScript* m_pInstance;
@@ -843,7 +843,7 @@ public:
             if (Flame_Lash_Timer <= diff)
             {
                 DoCastVictim(SPELL_FLAME_LASH);
-                Flame_Lash_Timer = urand(5000, 10000);
+                Flame_Lash_Timer = urand(3000, 6000);
             }
             else Flame_Lash_Timer -= diff;
 
@@ -1032,7 +1032,7 @@ public:
         {
             if (Creature* Freya = me->GetCreature(*me, m_pInstance->GetData64(TYPE_FREYA)))
             {
-                if(!alreadyKilled) DoCast(Freya, SPELL_ATTUNED_TO_NATURE_REMOVE_10,true);
+                if(!alreadyKilled) DoCast(Freya, SPELL_ATTUNED_TO_NATURE_REMOVE_10, true);
                 alreadyKilled = true;
                 Freya->AI()->DoAction(ACTION_ELEMENTAL_DEAD);
             }
@@ -1261,7 +1261,7 @@ public:
             if(Solar_Flare_Timer <= diff)
             {
                 uint32 target_count = me->GetAuraCount(SPELL_BRIGHTLEAF_FLUX_BUFF);
-                me->CastCustomSpell(RAID_MODE(SPELL_SOLAR_FLARE_10, SPELL_SOLAR_FLARE_25),SPELLVALUE_MAX_TARGETS,target_count,me,true);
+                me->CastCustomSpell(RAID_MODE(SPELL_SOLAR_FLARE_10, SPELL_SOLAR_FLARE_25),SPELLVALUE_MAX_TARGETS, target_count, me, true);
                 //DoCastAOE(RAID_MODE(SPELL_SOLAR_FLARE_10, SPELL_SOLAR_FLARE_25),true);
                 Solar_Flare_Timer = 10000 + urand(1500, 6000);
             }
@@ -1522,16 +1522,16 @@ class mob_eonars_gift : public CreatureScript
 public:
    mob_eonars_gift() : CreatureScript("mob_eonars_gift") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_eonars_giftAI (pCreature);
+        return new mob_eonars_giftAI(creature);
     }
 
-    struct mob_eonars_giftAI : public ScriptedAI
+    struct mob_eonars_giftAI : public Scripted_NoMovementAI
     {
-        mob_eonars_giftAI(Creature *pCreature) : ScriptedAI(pCreature)
+        mob_eonars_giftAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
-            m_pInstance = pCreature->GetInstanceScript();
+            m_pInstance = creature->GetInstanceScript();
         }
 
         InstanceScript* m_pInstance;
@@ -1543,7 +1543,6 @@ public:
         void Reset()
         {
             me->setFaction(16);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             Grow_Timer = 100;
             Lifebinders_Gift_Timer = 12000;
             GrowCount = 0;
@@ -1551,14 +1550,14 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(m_pInstance && m_pInstance->GetBossState(TYPE_FREYA) != IN_PROGRESS)
+            if (m_pInstance && m_pInstance->GetBossState(TYPE_FREYA) != IN_PROGRESS)
             {
-                me->DealDamage(me,me->GetMaxHealth());
+                me->DealDamage(me, me->GetMaxHealth());
                 me->RemoveCorpse();
             }
 
-            if(GrowCount < 6)
-                if(Grow_Timer <= diff && GrowCount < 6)
+            if (GrowCount < 6)
+                if (Grow_Timer <= diff && GrowCount < 6)
                 {
                     DoCast(me, SPELL_GROW);
                     Grow_Timer = 2000;
@@ -1566,7 +1565,7 @@ public:
                 }
                 else Grow_Timer -= diff;
 
-            if(Lifebinders_Gift_Timer <= diff)
+            if (Lifebinders_Gift_Timer <= diff)
             {
                 DoCast(RAID_MODE(SPELL_LIFEBINDERS_GIFT_10, SPELL_LIFEBINDERS_GIFT_25));
                 Lifebinders_Gift_Timer = 6000;
@@ -1594,7 +1593,7 @@ public:
         {
             Caster = GetCaster();
             Target = GetHitUnit();
-            if(Caster->FindNearestCreature(ENTRY_CREATURE_ELDER_BRIGHTLEAF, 5000, true))
+            if (Caster->FindNearestCreature(ENTRY_CREATURE_ELDER_BRIGHTLEAF, 5000, true))
                 Caster->SummonCreature(ENTRY_CREATURE_SUNBEAM, Target->GetPositionX(), Target->GetPositionY(), Target->GetPositionZ());
         }
 

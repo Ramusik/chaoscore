@@ -622,10 +622,12 @@ public:
         mob_scrapbotAI(Creature* creature) : ScriptedAI(creature)
         {
             _instance = me->GetInstanceScript();
+            nearCheckTimer = 5000;
             casted = false;
         }
 
         InstanceScript* _instance;
+        uint32 nearCheckTimer;
         bool casted;
 
         void Reset()
@@ -636,26 +638,25 @@ public:
                 me->GetMotionMaster()->MoveFollow(pXT002, 1, float(2*M_PI*rand_norm()));
         }
 
-        void UpdateAI(const uint32 /*diff*/)
+        void UpdateAI(const uint32 diff)
         {
-            if (Creature* pXT002 = me->GetCreature(*me, _instance->GetData64(TYPE_XT002)))
+            if (nearCheckTimer <= diff)
             {
-                if (!casted)
-                    if (me->GetDistance2d(pXT002) <= 2)
-                    {
-                        // TODO Send raid message
-                        casted = true;
-                        // Increase health with 1 percent
-                        pXT002->CastSpell(pXT002, SPELL_HEAL_XT002, true);
-                        //pXT002->ModifyHealth(int32(pXT002->CountPctFromMaxHealth(1)));
-                        pXT002->AI()->DoAction(ACTION_XT002_REACHED);
-                        // Despawns the scrapbot
-                        me->DespawnOrUnsummon(500);
-                    }
-            }
+                if (Creature* pXT002 = me->GetCreature(*me, _instance->GetData64(TYPE_XT002)))
+                    if (!casted)
+                        if (me->GetDistance2d(pXT002) <= 2)
+                        {
+                            // TODO Send raid message
+                            casted = true;
+                            pXT002->CastSpell(pXT002, SPELL_HEAL_XT002, true);
+                            pXT002->AI()->DoAction(ACTION_XT002_REACHED);
+                            me->DespawnOrUnsummon(500);
+                        }
+
+                nearCheckTimer = 1000;
+            } else nearCheckTimer -= diff;
         }
     };
-
 };
 
 /*-------------------------------------------------------

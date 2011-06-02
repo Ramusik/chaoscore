@@ -296,6 +296,7 @@ public:
             //_JustDied();
 
             me->setFaction(35);
+            instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, 33432);
 
             if (instance)
             {
