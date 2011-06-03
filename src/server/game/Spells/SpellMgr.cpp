@@ -4069,7 +4069,6 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
             ++count;
             break;
-         case 65210: // Keeper Mimiron Destabilization Matrix
         case 65210: // Keeper Mimiron Destabilization Matrix - Ignore LoS (because Mimiron stands in a Tube and is out of LoS)
         case 62042: // Thorim - Stormhammer
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_LOS;
