@@ -266,13 +266,6 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!instance->CheckRequiredBosses(DATA_DEATHBRINGER_SAURFANG, who->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
                 // oh just screw intro, enter combat - no exploits please
                 me->setActive(true);
                 DoZoneInCombat();
@@ -497,7 +490,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     case PHASE_INTRO_A:
                     case PHASE_INTRO_H:
                     {
-                        if (GameObject* teleporter = GameObject::GetGameObject(*me, instance->GetData64(GO_TELEPORT_RAMPART_OF_SKULLS)))
+                        if (GameObject* teleporter = GameObject::GetGameObject(*me, instance->GetData64(GO_SCOURGE_TRANSPORTER_SAURFANG)))
                         {
                             instance->HandleGameObject(0, false, teleporter);
                             teleporter->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);

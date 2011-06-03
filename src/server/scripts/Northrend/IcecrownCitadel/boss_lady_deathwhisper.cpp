@@ -266,13 +266,6 @@ class boss_lady_deathwhisper : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!instance->CheckRequiredBosses(DATA_LADY_DEATHWHISPER, who->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
                 me->setActive(true);
                 DoZoneInCombat();
 
@@ -303,7 +296,6 @@ class boss_lady_deathwhisper : public CreatureScript
 
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, DONE);                
                 instance->SetData(DATA_LADY_DEATHWHISPER, DONE);                
-
                 std::set<uint32> livingAddEntries;
                 // Full House achievement
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)

@@ -195,12 +195,8 @@ class boss_blood_council_controller : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!instance->CheckRequiredBosses(DATA_BLOOD_PRINCE_COUNCIL, who->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+                if (instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
                     return;
-                }
 
                 instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
                 instance->SetData(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
@@ -1431,7 +1427,7 @@ class spell_taldaram_flame_ball_visual : public SpellScriptLoader
 
             void Register()
             {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_flame_ball_visual_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_flame_ball_visual_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
             }
         };
 

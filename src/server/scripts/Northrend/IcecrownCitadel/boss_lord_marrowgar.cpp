@@ -119,6 +119,7 @@ class boss_lord_marrowgar : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 Talk(SAY_DEATH);
+
                 _JustDied();
                 instance->SetBossState(DATA_LORD_MARROWGAR, DONE);
                 instance->SetData(DATA_LORD_MARROWGAR, DONE);

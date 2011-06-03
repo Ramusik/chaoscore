@@ -152,13 +152,6 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!instance->CheckRequiredBosses(DATA_BLOOD_QUEEN_LANA_THEL, who->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
                 me->setActive(true);
                 DoZoneInCombat();
                 Talk(SAY_AGGRO);
@@ -589,7 +582,7 @@ class spell_blood_queen_frenzied_bloodthirst : public SpellScriptLoader
 
             void Register()
             {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_blood_queen_frenzied_bloodthirst_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_OVERRIDE_SPELLS, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_blood_queen_frenzied_bloodthirst_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_OVERRIDE_SPELLS, AURA_EFFECT_HANDLE_REAL);
             }
         };
 

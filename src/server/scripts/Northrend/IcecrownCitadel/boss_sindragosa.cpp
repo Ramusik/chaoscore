@@ -209,13 +209,6 @@ class boss_sindragosa : public CreatureScript
 
             void EnterCombat(Unit* victim)
             {
-                if (!instance->CheckRequiredBosses(DATA_SINDRAGOSA, victim->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
                 BossAI::EnterCombat(victim);
                 instance->SetData(DATA_SINDRAGOSA, IN_PROGRESS);
                 instance->SetBossState(DATA_SINDRAGOSA, IN_PROGRESS);
@@ -1040,7 +1033,7 @@ class spell_sindragosa_instability : public SpellScriptLoader
 
             void Register()
             {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_sindragosa_instability_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_sindragosa_instability_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
