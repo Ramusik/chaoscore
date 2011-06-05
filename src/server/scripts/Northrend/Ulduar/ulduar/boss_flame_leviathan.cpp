@@ -835,18 +835,20 @@ class npc_liquid_pyrite : public CreatureScript
         }
 };
 
-// WHY IS THIS CALLED spell_???
-class spell_pool_of_tar : public CreatureScript
+class npc_pool_of_tar : public CreatureScript
 {
     public:
-        spell_pool_of_tar() : CreatureScript("spell_pool_of_tar") { }
+        npc_pool_of_tar() : CreatureScript("npc_pool_of_tar") { }
 
-        struct spell_pool_of_tarAI : public PassiveAI
+        struct npc_pool_of_tarAI : public PassiveAI
         {
-            spell_pool_of_tarAI(Creature* creature) : PassiveAI(creature)
+            npc_pool_of_tarAI(Creature* creature) : PassiveAI(creature)
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->AddAura(SPELL_TAR_PASSIVE, me);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+                DoCast(me, SPELL_TAR_PASSIVE, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void DamageTaken(Unit* /*who*/, uint32& damage)
@@ -856,14 +858,19 @@ class spell_pool_of_tar : public CreatureScript
 
             void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
             {
-                if (spell->SchoolMask & SPELL_SCHOOL_MASK_FIRE && !me->HasAura(SPELL_BLAZE))
-                    me->CastSpell(me, SPELL_BLAZE, true);
+                if ((spell->Id == 65044 || spell->Id == 65045) && !me->HasAura(SPELL_BLAZE))
+                {
+                    DoCast(me, SPELL_BLAZE, true);
+                    me->ForcedDespawn(45000);
+                }
             }
+
+            void UpdateAI(const uint32 /*diff*/) { }
         };
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new spell_pool_of_tarAI(creature);
+            return new npc_pool_of_tarAI(creature);
         }
 };
 
@@ -1550,6 +1557,40 @@ class spell_pursued : public SpellScriptLoader
         }
 };
 
+// find a more simple way
+class spell_flame_leviathan_flames : public SpellScriptLoader
+{
+    public:
+        spell_flame_leviathan_flames() : SpellScriptLoader("spell_flame_leviathan_flames") { }
+
+        class spell_flame_leviathan_flames_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_flame_leviathan_flames_SpellScript);
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                if (GetHitUnit()->HasAura(62297))
+                    GetHitUnit()->RemoveAura(62297);
+            }
+
+            void HandleDamage(SpellEffIndex /*effIndex*/)
+            {
+                SetHitDamage(0);
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_flame_leviathan_flames_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffect += SpellEffectFn(spell_flame_leviathan_flames_SpellScript::HandleDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_flame_leviathan_flames_SpellScript();
+        }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     new boss_flame_leviathan();
@@ -1559,7 +1600,7 @@ void AddSC_boss_flame_leviathan()
     new boss_flame_leviathan_overload_device();
     new npc_mechanolift();
     new npc_liquid_pyrite();
-    new spell_pool_of_tar();
+    new npc_pool_of_tar();
     new npc_colossus();
     new npc_thorims_hammer();
     new npc_mimirons_inferno();
@@ -1577,4 +1618,5 @@ void AddSC_boss_flame_leviathan()
     new achievement_unbroken();
     new spell_anti_air_rocket();
     new spell_pursued();
+    new spell_flame_leviathan_flames();
 }
