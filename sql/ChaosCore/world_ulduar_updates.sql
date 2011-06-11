@@ -118,6 +118,13 @@ INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_
 (33412, 603, 3, 1, 0, 0, 1939.094, 42.534, 338.296, 5.321, 604800, 0, 0, 14433075, 0, 0, 0),
 (33413, 603, 3, 1, 0, 0, 2036.739, -73.705, 338.296, 2.435, 604800, 0, 0, 14433075, 0, 0, 0);
 
+-- Remove NON_SELECTABLE from Clockwork Mechanic	
+UPDATE creature_template SET unit_flags = unit_flags &~ 33554432 WHERE entry = 34184;
+UPDATE creature_template SET unit_flags = unit_flags &~ 33554432 WHERE entry = 34219;
+
+UPDATE `script_texts` SET `sound`=15476 WHERE `entry`=-1603053;
+DELETE FROM `gameobject` WHERE `guid` = '42516';
+UPDATE `gameobject` SET `spawnMask`=3 WHERE `map`=603;
 
 
 
