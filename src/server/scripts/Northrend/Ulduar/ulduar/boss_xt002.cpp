@@ -179,7 +179,7 @@ class boss_xt002 : public CreatureScript
 
         CreatureAI* GetAI(Creature* pCreature) const
         {
-            return new boss_xt002_AI(creature);
+            return new boss_xt002_AI(pCreature);
         }
 
         struct boss_xt002_AI : public BossAI
@@ -443,7 +443,7 @@ public:
 
         void DamageTaken(Unit * /*pDone*/, uint32 &damage)
         {
-            Creature* XT002 = me->GetCreature(*me, m_pInstance->GetData64(BOSS_XT002));
+            Creature* XT002 = me->GetCreature(*me, m_pInstance->GetData64(TYPE_XT002));
             if (!XT002 || !XT002->AI())
                 return;
 
@@ -489,7 +489,7 @@ class mob_scrapbot : public CreatureScript
 
                 RangeCheckTimer = 500;
 
-                if (Creature* pXT002 = me->GetCreature(*me, Instance->GetData64(BOSS_XT002)))
+                if (Creature* pXT002 = me->GetCreature(*me, Instance->GetData64(TYPE_XT002)))
                     me->GetMotionMaster()->MoveFollow(pXT002, 0.0f, 0.0f);
             }
 
@@ -497,7 +497,7 @@ class mob_scrapbot : public CreatureScript
             {
                 if (RangeCheckTimer <= diff)
                 {
-                    if (Creature* pXT002 = me->GetCreature(*me, Instance->GetData64(BOSS_XT002)))
+                    if (Creature* pXT002 = me->GetCreature(*me, Instance->GetData64(TYPE_XT002)))
                     {
                         if (me->IsWithinMeleeRange(pXT002))
                             DoCast(pXT002, SPELL_SCRAPBOT_RIDE_VEHICLE);
@@ -542,7 +542,7 @@ public:
             uiTrampleTimer = TIMER_TRAMPLE;
             uiUppercutTimer = TIMER_UPPERCUT;
 
-            if (Creature* pXT002 = me->GetCreature(*me, Instance->GetData64(BOSS_XT002)))
+            if (Creature* pXT002 = me->GetCreature(*me, Instance->GetData64(TYPE_XT002)))
             {
                 Position pos;
                 pXT002->GetPosition(&pos);
@@ -646,7 +646,7 @@ class mob_boombot : public CreatureScript
                 me->SetFloatValue(UNIT_FIELD_MAXDAMAGE, 18000.0f);
 
                 // Todo: proper waypoints?
-                if (Creature* pXT002 = me->GetCreature(*me, _instance->GetData64(BOSS_XT002)))
+                if (Creature* pXT002 = me->GetCreature(*me, _instance->GetData64(TYPE_XT002)))
                     me->GetMotionMaster()->MoveFollow(pXT002, 0.0f, 0.0f);
             }
 

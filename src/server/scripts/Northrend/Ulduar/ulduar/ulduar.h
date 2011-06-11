@@ -37,24 +37,25 @@ enum UlduarTypes
     TYPE_YOGGSARON              = 12,
     TYPE_ALGALON                = 13,
     TYPE_COLOSSUS               = 14,
-
-    TYPE_SARA,
-    TYPE_BRAIN_DOOR_1,
-    TYPE_BRAIN_DOOR_2,
-    TYPE_BRAIN_DOOR_3,
-    DATA_KEEPER_SUPPORT_YOGG,
-    
+ 
     // Assembly of Iorn
     DATA_STEELBREAKER,
     DATA_MOLGEIM,
     DATA_BRUNDIR,
 
+    //Razorscale
     DATA_EXP_COMMANDER,
     DATA_RAZORSCALE_CONTROL,
 
     // Kologarn:
     DATA_LEFT_ARM,
     DATA_RIGHT_ARM,
+
+    // XT-002
+    DATA_TOY_PILE_0,
+    DATA_TOY_PILE_1,
+    DATA_TOY_PILE_2,
+    DATA_TOY_PILE_3,
 
     // Freya Elders
     TYPE_ELDER_BRIGHTLEAF,
@@ -66,10 +67,12 @@ enum UlduarTypes
     DATA_RUNE_GIANT,
     DATA_RUNIC_DOOR,
     DATA_STONE_DOOR,
+
+    //Hodir
     DATA_HODIR_RARE_CHEST,
 
-    DATA_CALL_TRAM,
     //Mimiron
+    DATA_CALL_TRAM,
     DATA_LEVIATHAN_MK_II,
     DATA_MIMIRON_ELEVATOR,
     DATA_AERIAL_UNIT,
@@ -78,6 +81,13 @@ enum UlduarTypes
 
     //Pre YoggSaron
     DATA_ADD_HELP_FLAG,
+
+    //YOggSaron
+    TYPE_SARA,
+    TYPE_BRAIN_DOOR_1,
+    TYPE_BRAIN_DOOR_2,
+    TYPE_BRAIN_DOOR_3,
+    DATA_KEEPER_SUPPORT_YOGG,
 };
 
 enum UlduarNPCs
@@ -89,6 +99,7 @@ enum UlduarNPCs
     NPC_STEELFORGED_DEFFENDER   = 33236,
     NPC_EXPEDITION_COMMANDER    = 33210,
     NPC_XT002                   = 33293,
+    NPC_XT_TOY_PILE             = 33337,
     NPC_STEELBREAKER            = 32867,
     NPC_MOLGEIM                 = 32927,
     NPC_BRUNDIR                 = 32857,

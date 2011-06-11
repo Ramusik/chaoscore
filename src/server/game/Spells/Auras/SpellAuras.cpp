@@ -285,8 +285,6 @@ Aura* Aura::TryCreate(SpellEntry const* spellproto, uint8 tryEffMask, WorldObjec
 }
 
 Aura* Aura::Create(SpellEntry const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, Item* castItem, uint64 casterGUID)
-280	283	
- 
 {
     ASSERT(effMask);
     ASSERT(spellproto);

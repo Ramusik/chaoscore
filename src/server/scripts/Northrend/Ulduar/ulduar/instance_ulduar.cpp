@@ -56,6 +56,7 @@ public:
         // XT-002
         uint64 uiXT002GUID;
         uint64 uiXT002DoorGUID;
+		uint64 XTToyPileGUIDs[4];
 
         // Assembly of Iron
         uint64 uiAssemblyGUIDs[3];
@@ -209,6 +210,7 @@ public:
             memset(uiEncounter, 0, sizeof(uiEncounter));
             memset(uiAssemblyGUIDs, 0, sizeof(uiAssemblyGUIDs));
             memset(uiRazorHarpoonGUIDs, 0, sizeof(uiRazorHarpoonGUIDs));
+			memset(XTToyPileGUIDs, 0, sizeof(XTToyPileGUIDs));
         }
 
         bool IsEncounterInProgress() const
@@ -372,6 +374,11 @@ public:
                     return;
                 case NPC_XT002:
                     uiXT002GUID = creature->GetGUID();
+                    break;
+				case NPC_XT_TOY_PILE:
+                    for (uint8 i = 0; i < 4; ++i)
+                        if (!XTToyPileGUIDs[i])
+                            XTToyPileGUIDs[i] = creature->GetGUID();
                     break;
 
                 // Assembly of Iron
@@ -894,6 +901,10 @@ public:
                 case TYPE_RAZORSCALE:           return uiRazorscaleGUID;
                 case DATA_RAZORSCALE_CONTROL:   return uiRazorscaleController;
                 case TYPE_XT002:                return uiXT002GUID;
+                case DATA_TOY_PILE_0:
+                case DATA_TOY_PILE_1:
+                case DATA_TOY_PILE_2:
+                case DATA_TOY_PILE_3:           return XTToyPileGUIDs[data - DATA_TOY_PILE_0];
                 case TYPE_KOLOGARN:             return uiKologarnGUID;
                 case DATA_LEFT_ARM:             return uiLeftArmGUID;
                 case DATA_RIGHT_ARM:            return uiRightArmGUID;
