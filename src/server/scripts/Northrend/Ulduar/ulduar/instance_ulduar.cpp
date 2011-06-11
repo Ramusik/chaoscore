@@ -1012,7 +1012,7 @@ public:
                 }
                 uint32 tmpState, tmpState2, tmpState3;
                 loadStream >> tmpState >> tmpState2 >> tmpState3;
-                // tmpState == GetData(TYPE_COLOSSUS) (?)
+                uiEncounter[TYPE_COLOSSUS] = tmpState;
                 uiPlayerDeathFlag = tmpState2;
                 uiAlgalonCountdown = tmpState3;
             }

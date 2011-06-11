@@ -4112,6 +4112,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 63985:
         case 64224:
         case 64225:
+        case 62287: // Tar Passive
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             ++count;
             break;

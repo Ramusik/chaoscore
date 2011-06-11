@@ -231,6 +231,7 @@ class boss_flame_leviathan : public CreatureScript
                     Reset();
                 ActiveTowersCount = 4;
                 Shutdown = 0;
+                ShutdownActive = false;
                 ActiveTowers = false;
                 towerOfStorms = false;
                 towerOfLife = false;
@@ -241,11 +242,19 @@ class boss_flame_leviathan : public CreatureScript
 
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
                 me->SetReactState(REACT_PASSIVE);
+
+                if (instance->GetData(TYPE_COLOSSUS) == 2)
+                {
+                    DoAction(10);
+                    if (GameObject* Gate = me->FindNearestGameObject(GO_LEVIATHAN_GATE, 50.0f))
+                        Gate->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                }
             }
 
             Vehicle* vehicle;
             uint8 ActiveTowersCount;
             uint8 Shutdown;
+            bool ShutdownActive;
             bool ActiveTowers;
             bool towerOfStorms;
             bool towerOfLife;
@@ -272,6 +281,15 @@ class boss_flame_leviathan : public CreatureScript
                 events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON, 1*IN_MILLISECONDS);
                 ActiveTower(); //void ActiveTower
+                vehicle->InstallAllAccessories(false);
+            }
+
+            void EnterEvadeMode()
+            {
+                me->ClearUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT);
+                _EnterEvadeMode();
+                me->GetMotionMaster()->MoveTargetedHome();
+                Reset();
             }
 
             void ActiveTower()
@@ -382,6 +400,7 @@ class boss_flame_leviathan : public CreatureScript
                     return;
 
                 events.Update(diff);
+                _DoAggroPulse(diff);
 
                 if (Shutdown == RAID_MODE(2, 4))
                 {
@@ -392,22 +411,18 @@ class boss_flame_leviathan : public CreatureScript
                     return;
                 }
 
-                if (me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
+                if (ShutdownActive)
                 {
-                    me->SetReactState(REACT_PASSIVE);
-                    me->AddUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-                    if (Shutout)
-                        Shutout = false;
-                    return;
-                }
-                else
-                {
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                    if (!me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
+                    {
+                        ShutdownActive = false;
+                        me->ClearUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                    }
                 }
 
-                if (me->HasUnitState(UNIT_STAT_CASTING))
+                if (me->HasUnitState(UNIT_STAT_CASTING) || me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
                     return;
 
                 if (me->getVictim() && !me->getVictim()->HasAura(SPELL_PURSUED))
@@ -415,7 +430,7 @@ class boss_flame_leviathan : public CreatureScript
 
                 uint32 eventId = events.GetEvent();
 
-                switch(eventId)
+                switch (eventId)
                 {
                     case 0:
                         break; // this is a must
@@ -448,12 +463,20 @@ class boss_flame_leviathan : public CreatureScript
                         me->MonsterTextEmote(EMOTE_OVERLOAD, 0, true);
                         me->AddAura(SPELL_SYSTEMS_SHUTDOWN, me);
                         me->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
+
+                        ShutdownActive = true;
+                        me->SetReactState(REACT_PASSIVE);
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveIdle();
+                        me->AddUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT);
+                        if (Shutout)
+                            Shutout = false;
+
                         events.ScheduleEvent(EVENT_REPAIR, 4000);
                         events.CancelEvent(EVENT_SHUTDOWN);
                         break;
                     case EVENT_REPAIR:
                         me->MonsterTextEmote(EMOTE_REPAIR, 0, true);
-                        me->ClearUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ROOT);
                         events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
                         events.CancelEvent(EVENT_REPAIR);
                         break;
@@ -491,8 +514,9 @@ class boss_flame_leviathan : public CreatureScript
                         events.PopEvent();
                         break;
                 }
-                /*if (me->IsWithinMeleeRange(me->getVictim())) //bugged spell casts on units that are boarded on leviathan
-                DoSpellAttackIfReady(SPELL_BATTERING_RAM);*/
+
+                if (me->IsWithinMeleeRange(me->getVictim())) // bugged spell casts on units that are boarded on leviathan
+                    DoSpellAttackIfReady(SPELL_BATTERING_RAM);
                 DoMeleeAttackIfReady();
             }
 
@@ -512,7 +536,7 @@ class boss_flame_leviathan : public CreatureScript
                     if (!me->isDead())
                     {
                         me->SetHomePosition(Center->GetPositionX(), Center->GetPositionY(), Center->GetPositionZ(), 0);
-                        me->GetMotionMaster()->MoveCharge(Center->GetPositionX(), Center->GetPositionY(), Center->GetPositionZ()); //position center
+                        me->GetMotionMaster()->MoveCharge(Center->GetPositionX(), Center->GetPositionY(), Center->GetPositionZ()); // position center
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
                         return;
