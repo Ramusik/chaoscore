@@ -1436,7 +1436,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
 
         if (m_originalCaster)
         {
-            m_spellAura = Aura::TryCreate(aurSpellInfo, effectMask, unit,
+            m_spellAura = Aura::TryRefreshStackOrCreate(aurSpellInfo, effectMask, unit,
                 m_originalCaster, (aurSpellInfo == m_spellInfo)? &m_spellValue->EffectBasePoints[0] : &basePoints[0], m_CastItem);
             if (m_spellAura)
             {
@@ -2151,8 +2151,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 case TARGET_DEST_CASTER_FRONT_LEAP:
                 case TARGET_DEST_CASTER_FRONT:      angle = 0.0f;                                          break;
                 case TARGET_DEST_CASTER_BACK:       angle = static_cast<float>(M_PI);                      break;
-                case TARGET_DEST_CASTER_RIGHT:      angle = static_cast<float>(M_PI/2);                    break;
-                case TARGET_DEST_CASTER_LEFT:       angle = static_cast<float>(-M_PI/2);                   break;
+                case TARGET_DEST_CASTER_RIGHT:      angle = static_cast<float>(-M_PI/2);                   break;
+                case TARGET_DEST_CASTER_LEFT:       angle = static_cast<float>(M_PI/2);                    break;
                 default:                            angle = (float)rand_norm()*static_cast<float>(2*M_PI); break;
             }
 
@@ -2295,7 +2295,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
         {
             if (!m_originalCaster || !m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
             {
-                sLog->outError("SPELL: no current channeled spell for spell ID %u", m_spellInfo->Id);
+                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELL: no current channeled spell for spell ID %u - spell triggering this spell was interrupted.", m_spellInfo->Id);
                 break;
             }
 

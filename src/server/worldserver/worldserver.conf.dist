@@ -307,7 +307,7 @@ vmap.enableIndoorCheck = 1
 #        Default:     1 - (Enabled) List of map ids with delimiter ','
 #                     0 - (Disabled)
 
-pathing.ignoreMapsIds = ""
+pathing.ignoreMapsIds = "631,649"
 
 #
 #    pathfinding.activated
@@ -1124,9 +1124,9 @@ RecruitAFriend.MaxLevel = 60
 #    RecruitAFriend.MaxDifference
 #        Description: Highest level difference between linked Recruiter and Friend benefit from
 #                     the Recruit-A-Friend experience multiplier.
-#        Default:     3
+#        Default:     4
 
-RecruitAFriend.MaxDifference = 3
+RecruitAFriend.MaxDifference = 4
 
 #
 #    InstantLogout
