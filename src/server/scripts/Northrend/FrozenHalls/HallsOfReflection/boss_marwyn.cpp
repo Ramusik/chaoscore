@@ -28,7 +28,7 @@
 #include "ScriptPCH.h"
 #include "halls_of_reflection.h"
 
-enum
+enum Yells
 {
     SAY_MARWYN_INTRO                        = -1594506,
     SAY_MARWYN_AGGRO                        = -1668060,
@@ -36,8 +36,11 @@ enum
     SAY_MARWYN_SLAY01                       = -1668061,
     SAY_MARWYN_SLAY02                       = -1668062,
     SAY_MARWYN_SP01                         = -1668064,
-    SAY_MARWYN_SP02                         = -1668065,
+    SAY_MARWYN_SP02                         = -1668065
+};
 
+enum Spells
+{
     SPELL_OBLITERATE_N                      = 72360,
     SPELL_OBLITERATE_H                      = 72434,
     SPELL_SHARED_SUFFERING_N                = 72368,
@@ -45,8 +48,7 @@ enum
     SPELL_WELL_OF_CORRUPTION                = 72362,
     SPELL_CORRUPTED_FLESH_N                 = 72363,
     SPELL_CORRUPTED_FLESH_H                 = 72436,
-
-    SPELL_BERSERK                           = 47008,
+    SPELL_BERSERK                           = 47008
 };
 
 class boss_marwyn : public CreatureScript

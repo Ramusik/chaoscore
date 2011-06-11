@@ -28,15 +28,18 @@
 #include "ScriptPCH.h"
 #include "halls_of_reflection.h"
 
-enum
+enum Yells
 {
     SAY_FALRIC_AGGRO                        = -1668050,
     SAY_FALRIC_DEATH                        = -1668053,
     SAY_FALRIC_SLAY01                       = -1668051,
     SAY_FALRIC_SLAY02                       = -1668052,
     SAY_FALRIC_SP01                         = -1668054,
-    SAY_FALRIC_SP02                         = -1668055,
+    SAY_FALRIC_SP02                         = -1668055
+};
 
+enum Spells
+{
     SPELL_HOPELESSNESS                      = 72395,
     H_SPELL_HOPELESSNESS                    = 72390,
     SPELL_IMPENDING_DESPAIR                 = 72426,
@@ -44,7 +47,6 @@ enum
     SPELL_DEFILING_HORROR_H                 = 72452,
     SPELL_QUIVERING_STRIKE_N                = 72422,
     SPELL_QUIVERING_STRIKE_H                = 72453,
-
     SPELL_BERSERK                           = 47008
 };
 
