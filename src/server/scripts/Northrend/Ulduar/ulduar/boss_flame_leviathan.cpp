@@ -859,10 +859,7 @@ class npc_pool_of_tar : public CreatureScript
             void SpellHit(Unit* /*caster*/, SpellEntry const* spell)
             {
                 if ((spell->Id == 65044 || spell->Id == 65045) && !me->HasAura(SPELL_BLAZE))
-                {
                     DoCast(me, SPELL_BLAZE, true);
-                    me->ForcedDespawn(45000);
-                }
             }
 
             void UpdateAI(const uint32 /*diff*/) { }

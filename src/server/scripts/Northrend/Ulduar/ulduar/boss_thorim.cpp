@@ -269,14 +269,14 @@ class boss_thorim : public CreatureScript
 public:
     boss_thorim() : CreatureScript("boss_thorim") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_thorimAI(pCreature);
+        return new boss_thorimAI(creature);
     }
 
     struct boss_thorimAI : public BossAI
     {
-        boss_thorimAI(Creature* pCreature) : BossAI(pCreature, TYPE_THORIM)
+        boss_thorimAI(Creature* creature) : BossAI(creature, TYPE_THORIM)
         {
             bWipe = false;
         }
@@ -382,6 +382,7 @@ public:
             }
             
             events.Update(diff);
+            _DoAggroPulse(diff);
             EncounterTime += diff;
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
@@ -474,20 +475,32 @@ public:
             switch (spawnedAdds)
             {
                 case 0:
-                    for (uint8 n = 0; n < 3; n++)
-                        me->SummonCreature(ARENA_PHASE_ADD[n], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    // Dark Rune Commoner
+                    for (uint8 n = 0; n < urand(5, 6); n++)
+                        me->SummonCreature(ARENA_PHASE_ADD[1], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
                     break;
                 case 1:
-                    for (uint8 n = 0; n < 2; n++)
-                        me->SummonCreature(ARENA_PHASE_ADD[3], Pos[n], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    if (urand(0, 1))
+                    {
+                        // Dark Rune Champion
+                        for (uint8 n = 0; n < urand(1, 2); n++)
+                            me->SummonCreature(ARENA_PHASE_ADD[0], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                        // Dark Rune Evoker
+                        for (uint8 n = 0; n < urand(1, 2); n++)
+                            me->SummonCreature(ARENA_PHASE_ADD[2], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    }
+                    else
+                    {
+                        // Dark Rune Warbringer
+                        for (uint8 n = 0; n < 1; n++)
+                            me->SummonCreature(ARENA_PHASE_ADD[3], Pos[n], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    }
                     break;
             }
 
             spawnedAdds++;
             if (spawnedAdds > 1)
-            {
                 spawnedAdds = 0;
-            }
         }
         
         void DamageTaken(Unit* pKiller, uint32 &damage)
@@ -667,29 +680,6 @@ public:
                 damage = 0;
         }
 
-        //void EnterEvadeMode()
-        //{
-        //    Map* pMap = me->GetMap();
-        //    if (pMap->IsDungeon())
-        //    {
-        //        Map::PlayerList const &PlayerList = pMap->GetPlayers();
-        //        if (!PlayerList.isEmpty())
-        //        {
-        //            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-        //            {
-        //                if (i->getSource() && i->getSource()->isAlive() && isOnSameSide(i->getSource()))
-        //                {
-        //                    AttackStart(i->getSource());
-        //                    return;
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    me->StopMoving();
-        //    Reset();
-        //}
-
         void Reset()
         {
             PrimaryTimer = urand(3000, 6000);
@@ -697,7 +687,7 @@ public:
             ChargeTimer = 8000;
         }
 
-        void EnterCombat(Unit* /*pWho*/)
+        void EnterCombat(Unit* /*who*/)
         {
             if (id == DARK_RUNE_WARBRINGER)
                 DoCast(me, SPELL_AURA_OF_CELERITY);
@@ -705,12 +695,15 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (!isOnSameSide(me) || (me->getVictim() && !isOnSameSide(me->getVictim())))
+            if (!isOnSameSide(me))
             {
                 EnterEvadeMode();
                 return;
             }
             
+            if (me->getVictim() && !isOnSameSide(me->getVictim()))
+                me->getVictim()->getHostileRefManager().deleteReference(me);
+
             if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
                 return;
             

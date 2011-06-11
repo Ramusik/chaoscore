@@ -3737,6 +3737,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 27820:                         // Mana Detonation
         //case 28062: case 39090:             // Positive/Negative Charge
         //case 28085: case 39093:
+        case 62290:                         // Burning Tar
         case 69782: case 69796:             // Ooze Flood
         case 69798: case 69801:             // Ooze Flood
         case 69538: case 69553: case 69610: // Ooze Combine
@@ -4069,16 +4070,20 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
             ++count;
             break;
+        case 63025: // XT-002 Gravity Bomb
+        case 64233: // XT-002 Gravity Bomb
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
+            ++count;
+            break;
         case 65210: // Keeper Mimiron Destabilization Matrix - Ignore LoS (because Mimiron stands in a Tube and is out of LoS)
         case 62042: // Thorim - Stormhammer
+        case 62521: // Freya - Attuned to Nature 25 Dose Reduction
+        case 62524: // Freya - Attuned to Nature 2 Dose Reduction
+        case 62525: // Freya - Attuned to Nature 10 Dose Reduction
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_LOS;
             ++count;
             break;
         case 62488: // Ignis Activate Construct (only visually)
-        case 63024: // XT-002 Gravity Bomb
-        case 64234: // XT-002 Gravity Bomb
-        case 63018: // XT-002 Searing Light
-        case 65121: // XT-002 Searing Light
         case 65301: // Sara Psychosis
         case 63830: // Sara Malady of the Mind
         case 64465: // Yogg Saron Shadow Beacon
@@ -4105,6 +4110,18 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 64600: // Freya - Nature Bomb (GO Visual)
             spellInfo->DurationIndex = 38;
+            ++count;
+            break;
+        case 62056: // Kologarn - some Stone Grip related Spells that have SPELL_ATTR1_IGNORE_IMMUNITY (NYI?)
+        case 63985:
+        case 64224:
+        case 64225:
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            ++count;
+            break;
+        case 62711: // Ignis - Grab
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_REFLECTED;
             ++count;
             break;
         // ENDOF ULDUAR SPELLS

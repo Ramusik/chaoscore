@@ -22,10 +22,7 @@
             Nerf Gravity Bombs - (?) - Spellscript
             Must Deconstruct Faster - in XT-002 script / core
 
-        Boombot explosion only hurt allies to the npc at the moment
         Boombot explosion visual
-
-        If the boss is to close to a scrap pile -> no summon
         make the life sparks visible...
 */
 
@@ -149,6 +146,10 @@ enum Achievments
     ACHIEVEMENT_HEARTBREAKER_25                 = 3059
 };
 
+#define EMOTE_TYMPANIC "XT-002 Deconstructor begins to cause the earth to quake."
+#define EMOTE_HEART "XT-002 Deconstructor's heart is exposed and leaking energy."
+#define EMOTE_REPAIR "XT-002 Deconstructor consumes a scrap bot to repair himself!"
+
 /************************************************
 -----------------SPAWN LOCATIONS-----------------
 ************************************************/
@@ -259,6 +260,7 @@ public:
         void JustSummoned(Creature* summoned)
         {
             summons.Summon(summoned);
+            DoZoneInCombat(summoned);
         }
 
         void DoAction(const int32 action)
@@ -270,14 +272,10 @@ public:
                     {
                         hardMode = true;
                         me->AddLootMode(LOOT_MODE_HARD_MODE_1);
-
                         // Enter hard mode
                         enterHardMode = true;
-                        uiEnrageTimer = TIMER_ENRAGE;
-
                         // set max health
                         me->SetFullHealth();
-
                         // Get his heartbreak buff
                         me->CastSpell(me, RAID_MODE(SPELL_HEARTBREAK_10, SPELL_HEARTBREAK_25), true);
                     }
@@ -381,6 +379,7 @@ public:
                 if (uiTympanicTantrumTimer <= diff)
                 {
                     DoScriptText(SAY_TYMPANIC_TANTRUM, me);
+                    me->MonsterTextEmote(EMOTE_TYMPANIC, 0, true);
                     DoCast(SPELL_TYMPANIC_TANTRUM);
                     uiTympanicTantrumTimer = TIMER_TYMPANIC_TANTRUM;
                 } else uiTympanicTantrumTimer -= diff;
@@ -397,10 +396,7 @@ public:
                 }
                 else
                 {
-                    //Stop moving
-                    //me->StopMoving();
-
-                    //Start summoning adds
+                    // Start summoning adds
                     if (uiSpawnAddTimer <= diff)
                     {
                         DoScriptText(SAY_SUMMON, me);
@@ -414,10 +410,10 @@ public:
                             case 3: me->SummonCreature(NPC_XM024_PUMMELLER, UL_X, UL_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
                         }
 
-                        // Spawn 5 Bombs
+                        // Spawn 5 Scrapbots
                         for (int8 n = 0; n < 5; n++)
                         {
-                            //Some randomes are added so they wont spawn in a pile
+                            // Some randomes are added so they wont spawn in a pile
                             switch(rand() % 4)
                             {
                                 case 0: me->SummonCreature(NPC_XS013_SCRAPBOT, float(irand(LR_X - 3, LR_X + 3)), float(irand(LR_Y - 3, LR_Y + 3)), SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
@@ -427,13 +423,16 @@ public:
                             }
                         }
 
-                        //Spawn 5 Scrapbots
-                        switch (rand() % 4)
+                        // Spawn 3 Bombs
+                        for (int8 n = 0; n < 3; n++)
                         {
-                            case 0: me->SummonCreature(NPC_XE321_BOOMBOT, LR_X, LR_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
-                            case 1: me->SummonCreature(NPC_XE321_BOOMBOT, LL_X, LL_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
-                            case 2: me->SummonCreature(NPC_XE321_BOOMBOT, UR_X, UR_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
-                            case 3: me->SummonCreature(NPC_XE321_BOOMBOT, UL_X, UL_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
+                            switch (rand() % 4)
+                            {
+                                case 0: me->SummonCreature(NPC_XE321_BOOMBOT, LR_X, LR_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
+                                case 1: me->SummonCreature(NPC_XE321_BOOMBOT, LL_X, LL_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
+                                case 2: me->SummonCreature(NPC_XE321_BOOMBOT, UR_X, UR_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
+                                case 3: me->SummonCreature(NPC_XE321_BOOMBOT, UL_X, UL_Y, SPAWN_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); break;
+                            }
                         }
 
                         uiSpawnAddTimer = TIMER_SPAWN_ADD;
@@ -511,7 +510,7 @@ public:
                 heart->EnterVehicle(me, 1);
                 heart->ClearUnitState(UNIT_STAT_ONVEHICLE); // Hack
                 heart->SetInCombatWithZone();
-                heart->CastSpell(heart, SPELL_EXPOSED_HEART, false);
+                heart->CastSpell(heart, SPELL_EXPOSED_HEART, true);
             }
 
             // Start "end of phase 2 timer"
@@ -525,6 +524,7 @@ public:
             uiSpawnAddTimer = TIMER_SPAWN_ADD;
 
             DoScriptText(SAY_HEART_OPENED, me);
+            me->MonsterTextEmote(EMOTE_HEART, 0, true);
         }
 
         void SetPhaseOne()
@@ -568,7 +568,6 @@ public:
             _instance = creature->GetInstanceScript();
             //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_STUNNED);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-            //DoCast(me, SPELL_EXPOSED_HEART);
         }
 
         InstanceScript* _instance;
@@ -646,7 +645,7 @@ public:
                     if (!casted)
                         if (me->GetDistance2d(pXT002) <= 2)
                         {
-                            // TODO Send raid message
+                            pXT002->MonsterTextEmote(EMOTE_REPAIR, 0, true);
                             casted = true;
                             pXT002->CastSpell(pXT002, SPELL_HEAL_XT002, true);
                             pXT002->AI()->DoAction(ACTION_XT002_REACHED);
@@ -696,7 +695,7 @@ public:
         Unit* SelectPlayerTargetInRange(float range)
         {
             Player* target = NULL;
-            Trinity::AnyPlayerInObjectRangeCheck u_check(me, range);
+            Trinity::AnyPlayerInObjectRangeCheck u_check(me, range, true);
             Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, target, u_check);
             me->VisitNearbyObject(range, searcher);
             return target;
@@ -761,7 +760,7 @@ public:
         Unit* SelectPlayerTargetInRange(float range)
         {
             Player* target = NULL;
-            Trinity::AnyPlayerInObjectRangeCheck u_check(me, range);
+            Trinity::AnyPlayerInObjectRangeCheck u_check(me, range, true);
             Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, target, u_check);
             me->VisitNearbyObject(range, searcher);
             return target;
@@ -805,10 +804,11 @@ public:
         return new mob_void_zoneAI(creature);
     }
 
-    struct mob_void_zoneAI : public ScriptedAI
+    struct mob_void_zoneAI : public Scripted_NoMovementAI
     {
-        mob_void_zoneAI(Creature* creature) : ScriptedAI(creature)
+        mob_void_zoneAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
+            me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
 
@@ -876,30 +876,76 @@ public:
     };
 };
 
-class spell_gravity_bomb_targeting : public SpellScriptLoader
+class BombTargetSelector : public std::unary_function<Unit *, bool>
 {
     public:
-        spell_gravity_bomb_targeting() : SpellScriptLoader("spell_gravity_bomb_targeting") { }
+        BombTargetSelector(Creature* me, const Unit* victim) : _me(me), _victim(victim) {}
 
-        class spell_gravity_bomb_targeting_SpellScript : public SpellScript
+        bool operator() (Unit* target)
         {
-            PrepareSpellScript(spell_gravity_bomb_targeting_SpellScript);
+            if (target == _victim && _me->getThreatManager().getThreatList().size() > 1)
+                return true;
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                return true;
+
+            return false;
+        }
+
+        Creature* _me;
+        Unit const* _victim;
+};
+
+class spell_xt002_bomb_select_target : public SpellScriptLoader
+{
+    public:
+        spell_xt002_bomb_select_target() : SpellScriptLoader("spell_xt002_bomb_select_target") { }
+
+        class spell_xt002_bomb_select_target_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_xt002_bomb_select_target_SpellScript);
+
+            bool Load()
             {
-                unitList.remove(GetTargetUnit());
+                _target = NULL;
+                return GetCaster()->GetTypeId() == TYPEID_UNIT;
+            }
+
+            void FilterTargetsInitial(std::list<Unit*>& targetList)
+            {
+                targetList.remove_if(BombTargetSelector(GetCaster()->ToCreature(), GetCaster()->getVictim()));
+
+                if (targetList.empty())
+                    return;
+
+                std::list<Unit*>::iterator itr = targetList.begin();
+                std::advance(itr, urand(0, targetList.size() - 1));
+                Unit* target = *itr;
+                targetList.clear();
+                targetList.push_back(target);
+                _target = target;
+            }
+
+            void SetTarget(std::list<Unit*>& targetList)
+            {
+                targetList.clear();
+                if (_target)
+                    targetList.push_back(_target);
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_gravity_bomb_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_DST_CASTER);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_gravity_bomb_targeting_SpellScript::FilterTargets, EFFECT_1, TARGET_DST_CASTER);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_bomb_select_target_SpellScript::FilterTargetsInitial, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_bomb_select_target_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_AREA_ENEMY_DST);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_bomb_select_target_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_AREA_ENEMY_DST);
             }
+
+            Unit* _target;
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_gravity_bomb_targeting_SpellScript();
+            return new spell_xt002_bomb_select_target_SpellScript();
         }
 };
 
@@ -912,5 +958,5 @@ void AddSC_boss_xt002()
     new mob_void_zone();
     new mob_life_spark();
     new boss_xt002();
-    new spell_gravity_bomb_targeting();
+    new spell_xt002_bomb_select_target();
 }

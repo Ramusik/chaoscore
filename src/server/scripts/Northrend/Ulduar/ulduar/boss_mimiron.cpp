@@ -15,12 +15,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
  
-/* ScriptData
-SDName: Mimiron
-SD%Complete: 95
-SDComments: P3Wx2 Laser Barrage not works in phase 4 due to core limits.
-EndScriptData */
-
 #include "ScriptPCH.h"
 #include "ulduar.h"
 #include "Unit.h"
@@ -172,11 +166,6 @@ enum Npcs
     NPC_MKII_TURRET                             = 34071,
 };
 
-enum Objects
-{
-    GAMEOBJECT_DO_NOT_THIS_BUTTON               = 194739,
-};
-
 bool MimironHardMode;
 
 // Achievements
@@ -214,14 +203,14 @@ class boss_mimiron : public CreatureScript
 public:
     boss_mimiron() : CreatureScript("boss_mimiron") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_mimironAI(pCreature);
+        return new boss_mimironAI(creature);
     }
 
     struct boss_mimironAI : public BossAI
     {
-        boss_mimironAI(Creature *pCreature) : BossAI(pCreature, TYPE_MIMIRON)
+        boss_mimironAI(Creature* creature) : BossAI(creature, TYPE_MIMIRON)
         {
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
             me->SetReactState(REACT_PASSIVE);
@@ -282,10 +271,11 @@ public:
                 DespawnCreatures(34362, 100);
                 DespawnCreatures(NPC_ROCKET, 100);
 
-                if (GameObject* go = me->FindNearestGameObject(GAMEOBJECT_DO_NOT_THIS_BUTTON, 200))
+                if (GameObject* go = me->FindNearestGameObject(GO_BIG_RED_BUTTON, 200))
                 {
                     go->SetGoState(GO_STATE_READY);
                     go->SetLootState(GO_JUST_DEACTIVATED);
+                    go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
                 }
             }
         }
@@ -327,6 +317,9 @@ public:
             else
                 EnrageTimer = 15*60*1000; // Enrage in 15 min
             JumpToNextStep(100);
+
+            if (GameObject* go = me->FindNearestGameObject(GO_BIG_RED_BUTTON, 200))
+                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
         }
 
         void JumpToNextStep(uint32 uiTimer)
@@ -339,6 +332,8 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
+            _DoAggroPulse(diff);
 
             if (EnrageTimer <= diff && !Enraged)
             {
@@ -745,7 +740,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit *who)
+        void KilledUnit(Unit* /*who*/)
         {
             if (!(rand()%5))
                 if (instance)
@@ -758,7 +753,7 @@ public:
                     }
         }
 
-        void DamageTaken(Unit *who, uint32 &damage)
+        void DamageTaken(Unit* /*who*/, uint32 &damage)
         {
             if (phase == PHASE_LEVIATHAN_SOLO)
                 if (damage >= me->GetHealth())
@@ -772,9 +767,9 @@ public:
                     me->SetHealth(me->GetMaxHealth());
                     events.SetPhase(PHASE_NULL);
                     phase = PHASE_NULL;
-                    if (Creature *pMimiron = me->GetCreature(*me, instance->GetData64(TYPE_MIMIRON)))
-                        pMimiron->AI()->DoAction(DO_ACTIVATE_VX001);
-                    if (Creature *turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
+                    if (Creature* Mimiron = me->GetCreature(*me, instance->GetData64(TYPE_MIMIRON)))
+                        Mimiron->AI()->DoAction(DO_ACTIVATE_VX001);
+                    if (Creature* turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
                         turret->Kill(turret, false);
                     me->SetSpeed(MOVE_RUN, 1.5f, true);
                     me->GetMotionMaster()->MovePoint(0, 2790.11f, 2595.83f, 364.32f);
@@ -793,12 +788,12 @@ public:
                     me->SetStandState(UNIT_STAND_STATE_DEAD);
                     events.SetPhase(PHASE_NULL);
                     phase = PHASE_NULL;
-                    if (Creature *pMimiron = me->GetCreature(*me, instance->GetData64(TYPE_MIMIRON)))
-                        pMimiron->AI()->DoAction(DO_ACTIVATE_DEATH_TIMER);
+                    if (Creature* Mimiron = me->GetCreature(*me, instance->GetData64(TYPE_MIMIRON)))
+                        Mimiron->AI()->DoAction(DO_ACTIVATE_DEATH_TIMER);
                 }
         }
 
-        void EnterCombat(Unit *who)
+        void EnterCombat(Unit* /*who*/)
         {
             if (MimironHardMode)
             {
@@ -806,7 +801,7 @@ public:
                 events.ScheduleEvent(EVENT_FLAME_SUPPRESSANT, 60000, 0, PHASE_LEVIATHAN_SOLO);
             }
 
-            if (Creature *turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
+            if (Creature* turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
             {
                 turret->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                 turret->SetReactState(REACT_AGGRESSIVE);
@@ -1089,6 +1084,7 @@ public:
                 if (damage >= me->GetHealth())
                 {
                     damage = 0;
+                    spinning = false;
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                     me->AttackStop();
                     me->GetMotionMaster()->Initialize();
@@ -1105,6 +1101,7 @@ public:
                 if (damage >= me->GetHealth())
                 {
                     damage = 0;
+                    spinning = false;
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                     me->AttackStop();
                     me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
@@ -1164,7 +1161,7 @@ public:
                             if (Creature* leviathan = me->GetVehicleCreatureBase())
                             {
                                 float orient = leviathan->GetOrientation();
-                                leviathan->CastSpell(leviathan, 14821, true); // use a self stun as it prevents combat turning
+                                leviathan->CastSpell(leviathan, 14821, true); // temporary, to prevent turning
                                 leviathan->SetFacing(orient);
                                 me->SetOrientation(orient);
                             }
@@ -1192,7 +1189,7 @@ public:
                             break;
                         case EVENT_HEAT_WAVE:
                             DoCastAOE(SPELL_HEAT_WAVE);
-                            events.RescheduleEvent(EVENT_HEAT_WAVE, 12000, 0, PHASE_VX001_SOLO);
+                            events.RescheduleEvent(EVENT_HEAT_WAVE, 10000, 0, PHASE_VX001_SOLO);
                             break;
                         case EVENT_HAND_PULSE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
@@ -1633,7 +1630,7 @@ public:
         Unit* SelectPlayerTargetInRange(float range)
         {
             Player* target = NULL;
-            Trinity::AnyPlayerInObjectRangeCheck u_check(me, range);
+            Trinity::AnyPlayerInObjectRangeCheck u_check(me, range, true);
             Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, target, u_check);
             me->VisitNearbyObject(range, searcher);
             return target;

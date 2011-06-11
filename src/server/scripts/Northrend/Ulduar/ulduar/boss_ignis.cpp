@@ -21,18 +21,20 @@
 #include "SpellAuraEffects.h"
 #include "ulduar.h"
 
+// TODO: remove the Grab Hack
+
 enum Yells
 {
-    SAY_AGGRO                                   = -1603220,
-    SAY_SLAY_1                                  = -1603221,
-    SAY_SLAY_2                                  = -1603222,
-    SAY_DEATH                                   = -1603223,
-    SAY_SUMMON                                  = -1603224,
-    SAY_SLAG_POT                                = -1603225,
-    SAY_SCORCH_1                                = -1603226,
-    SAY_SCORCH_2                                = -1603227,
-    SAY_BERSERK                                 = -1603228,
-    EMOTE_JETS                                  = -1603229,
+    SAY_AGGRO                                = -1603220,
+    SAY_SLAY_1                               = -1603221,
+    SAY_SLAY_2                               = -1603222,
+    SAY_DEATH                                = -1603223,
+    SAY_SUMMON                               = -1603224,
+    SAY_SLAG_POT                             = -1603225,
+    SAY_SCORCH_1                             = -1603226,
+    SAY_SCORCH_2                             = -1603227,
+    SAY_BERSERK                              = -1603228,
+    EMOTE_JETS                               = -1603229,
 };
 
 enum Spells
@@ -48,6 +50,7 @@ enum Spells
     SPELL_STRENGTH                           = 64473,
     SPELL_GRAB                               = 62707,
     SPELL_BERSERK                            = 47008,
+    SPELL_GRAB_ENTER_VEHICLE                 = 62711,
 
     // Constructs
     SPELL_HEAT                               = 65667,
@@ -69,7 +72,6 @@ enum Events
     EVENT_SLAG_POT,
     EVENT_GRAB_POT,
     EVENT_CHANGE_POT,
-    EVENT_END_POT,
     EVENT_CONSTRUCT,
     EVENT_BERSERK,
     ACTION_REMOVE_BUFF = 20
@@ -77,15 +79,15 @@ enum Events
 
 enum Creatures
 {
-    NPC_IRON_CONSTRUCT                          = 33121,
-    NPC_GROUND_SCORCH                           = 33221
+    NPC_IRON_CONSTRUCT                       = 33121,
+    NPC_GROUND_SCORCH                        = 33221
 };
 
 enum AchievementData
 {
-    ACHIEVEMENT_SHATTERED_10                    = 2925,
-    ACHIEVEMENT_SHATTERED_25                    = 2926,
-    ACHIEVEMENT_TIMED_START_EVENT               = 20951
+    ACHIEVEMENT_SHATTERED_10                 = 2925,
+    ACHIEVEMENT_SHATTERED_25                 = 2926,
+    ACHIEVEMENT_TIMED_START_EVENT            = 20951
 };
 
 const Position Pos[20] =
@@ -160,7 +162,7 @@ public:
             DoScriptText(SAY_AGGRO, me);
             events.ScheduleEvent(EVENT_JET, 30000);
             events.ScheduleEvent(EVENT_SCORCH, 25000);
-            events.ScheduleEvent(EVENT_SLAG_POT, 35000);
+            events.ScheduleEvent(EVENT_SLAG_POT, 35000, 1);
             events.ScheduleEvent(EVENT_CONSTRUCT, 15000);
             events.ScheduleEvent(EVENT_BERSERK, 480000);
             SlagPotGUID = 0;
@@ -211,6 +213,7 @@ public:
                     case EVENT_JET:
                         me->MonsterTextEmote(EMOTE_JETS, 0, true);
                         DoCastAOE(SPELL_FLAME_JETS);
+                        events.DelayEvents(5000, 1);
                         events.ScheduleEvent(EVENT_JET, urand(35000, 40000));
                         break;
                     case EVENT_SLAG_POT:
@@ -219,15 +222,14 @@ public:
                             DoScriptText(SAY_SLAG_POT, me);
                             SlagPotGUID = target->GetGUID();
                             DoCast(target, SPELL_GRAB);
-                            events.DelayEvents(3000);
                             events.ScheduleEvent(EVENT_GRAB_POT, 500);
                         }
-                        events.ScheduleEvent(EVENT_SLAG_POT, RAID_MODE(30000, 15000));
+                        events.ScheduleEvent(EVENT_SLAG_POT, RAID_MODE(30000, 15000), 1);
                         break;
                     case EVENT_GRAB_POT:
                         if (Unit* SlagPotTarget = Unit::GetUnit(*me, SlagPotGUID))
                         {
-                            SlagPotTarget->EnterVehicle(me, 0);
+                            SlagPotTarget->CastCustomSpell(SPELL_GRAB_ENTER_VEHICLE, SPELLVALUE_BASE_POINT0, 1, me, true);
                             events.ScheduleEvent(EVENT_CHANGE_POT, 1000);
                         }
                         break;
@@ -235,16 +237,9 @@ public:
                         if (Unit* SlagPotTarget = Unit::GetUnit(*me, SlagPotGUID))
                         {
                             SlagPotTarget->AddAura(SPELL_SLAG_POT, SlagPotTarget);
-                            SlagPotTarget->EnterVehicle(me, 1);
-                            SlagPotTarget->ClearUnitState(UNIT_STAT_ONVEHICLE); // Hack
-                            events.ScheduleEvent(EVENT_END_POT, 10000);
-                        }
-                        break;
-                    case EVENT_END_POT:
-                        if (Unit* SlagPotTarget = Unit::GetUnit(*me, SlagPotGUID))
-                        {
                             SlagPotTarget->ExitVehicle();
-                            SlagPotTarget = NULL;
+                            SlagPotTarget->CastCustomSpell(SPELL_GRAB_ENTER_VEHICLE, SPELLVALUE_BASE_POINT0, 2, me, true);
+                            SlagPotTarget->ClearUnitState(UNIT_STAT_ONVEHICLE); // Hack
                             SlagPotGUID = 0;
                         }
                         break;
