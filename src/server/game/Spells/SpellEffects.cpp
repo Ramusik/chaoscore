@@ -6151,7 +6151,7 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
 
 void Spell::EffectKnockBack(SpellEffIndex effIndex)
 {
-    if (!unitTarget)
+    if (!unitTarget || unitTarget->HasAura(46924))
         return;
 
     if (Creature* creatureTarget = unitTarget->ToCreature())
