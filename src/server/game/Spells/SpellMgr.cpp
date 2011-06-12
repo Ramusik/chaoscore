@@ -4072,6 +4072,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
             ++count;
             break;
+        case 64218: // Emalon - Overcharge
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_LOS;
+            ++count;
+            break;
         // ULDUAR SPELLS
         //
         case 62016: // Thorim - Charge Orb
