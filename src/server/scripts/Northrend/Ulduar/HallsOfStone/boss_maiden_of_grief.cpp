@@ -166,7 +166,7 @@ public:
                 pInstance->SetData(DATA_MAIDEN_OF_GRIEF_EVENT, DONE);
         }
 
-        void KilledUnit(Unit * victim)
+        void KilledUnit(Unit* victim)
         {
             if (victim == me)
                 return;

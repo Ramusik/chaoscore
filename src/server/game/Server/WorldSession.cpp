@@ -46,7 +46,7 @@
 #include "PlayerbotAI.h"
 #include "PlayerbotClassAI.h"
 
-bool MapSessionFilter::Process(WorldPacket *packet)
+bool MapSessionFilter::Process(WorldPacket* packet)
 {
     OpcodeHandler const &opHandle = opcodeTable[packet->GetOpcode()];
 
@@ -68,7 +68,7 @@ bool MapSessionFilter::Process(WorldPacket *packet)
 
 //we should process ALL packets when player is not in world/logged in
 //OR packet handler is not thread-safe!
-bool WorldSessionFilter::Process(WorldPacket *packet)
+bool WorldSessionFilter::Process(WorldPacket* packet)
 {
     OpcodeHandler const &opHandle = opcodeTable[packet->GetOpcode()];
     //check if packet handler is supposed to be safe
@@ -127,7 +127,7 @@ WorldSession::~WorldSession()
     }
 
     ///- empty incoming packet queue
-    WorldPacket *packet = NULL;
+    WorldPacket* packet = NULL;
     while (_recvQueue.next(packet))
         delete packet;
 
@@ -204,7 +204,7 @@ void WorldSession::QueuePacket(WorldPacket *new_packet)
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnexpectedOpcode(WorldPacket *packet, const char* status, const char *reason)
+void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char *reason)
 {
     sLog->outError("SESSION (account: %u, guidlow: %u, char: %s): received unexpected opcode %s (0x%.4X, status: %s) %s",
         GetAccountId(), m_GUIDLow, _player ? _player->GetName() : "<none>",
@@ -212,7 +212,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket *packet, const char* status, 
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnprocessedTail(WorldPacket *packet)
+void WorldSession::LogUnprocessedTail(WorldPacket* packet)
 {
     sLog->outError("SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %u from %u)",
         LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode(), uint32(packet->rpos()), uint32(packet->wpos()));
@@ -232,7 +232,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
-    WorldPacket *packet = NULL;
+    WorldPacket* packet = NULL;
     while (m_Socket && !m_Socket->IsClosed() && _recvQueue.next(packet, updater))
     {
         if (packet->GetOpcode() >= NUM_MSG_TYPES)

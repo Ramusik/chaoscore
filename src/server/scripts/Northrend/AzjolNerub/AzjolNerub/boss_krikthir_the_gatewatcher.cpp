@@ -198,7 +198,7 @@ public:
             pInstance->DoCompleteAchievement(ACHIEV_WATCH_HIM_DIE);
         }
 
-        void KilledUnit(Unit * victim)
+        void KilledUnit(Unit* victim)
         {
             if (victim == me)
                 return;

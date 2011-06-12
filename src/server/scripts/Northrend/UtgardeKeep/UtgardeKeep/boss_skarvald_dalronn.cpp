@@ -103,7 +103,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit * who)
+        void EnterCombat(Unit* who)
         {
             if (!ghost && pInstance)
             {
@@ -148,7 +148,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             if (!ghost)
             {
@@ -263,7 +263,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit * who)
+        void EnterCombat(Unit* who)
         {
             if (!ghost && pInstance)
             {
@@ -310,7 +310,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             if (!ghost)
             {

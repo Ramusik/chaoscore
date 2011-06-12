@@ -233,7 +233,7 @@ public:
         InstanceScript* pInstance;
         uint32 phase;
 
-        void EnterCombat(Unit * who)
+        void EnterCombat(Unit* who)
         {
             StartEncounter(pInstance, me, who);
             DoScriptText(SAY_STEELBREAKER_AGGRO, me);
@@ -305,7 +305,7 @@ public:
             pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
         }
 
-        void KilledUnit(Unit * /*who*/)
+        void KilledUnit(Unit* /*who*/)
         {
             DoScriptText(RAND(SAY_STEELBREAKER_SLAY_1, SAY_STEELBREAKER_SLAY_2), me);
 
@@ -313,7 +313,7 @@ public:
                 DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
         }
 
-        void SpellHit(Unit * /*from*/, const SpellEntry *spell)
+        void SpellHit(Unit* /*from*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_SUPERCHARGE)
                 DoAction(EVENT_UPDATEPHASE);
@@ -500,12 +500,12 @@ public:
              pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
         }
 
-        void KilledUnit(Unit * /*who*/)
+        void KilledUnit(Unit* /*who*/)
         {
             DoScriptText(RAND(SAY_MOLGEIM_SLAY_1, SAY_MOLGEIM_SLAY_2), me);
         }
 
-        void SpellHit(Unit * /*from*/, const SpellEntry *spell)
+        void SpellHit(Unit* /*from*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_SUPERCHARGE)
                 DoAction(EVENT_UPDATEPHASE);
@@ -757,12 +757,12 @@ public:
             pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
         }
 
-        void KilledUnit(Unit * /*who*/)
+        void KilledUnit(Unit* /*who*/)
         {
             DoScriptText(RAND(SAY_BRUNDIR_SLAY_1, SAY_BRUNDIR_SLAY_2), me);
         }
 
-        void SpellHit(Unit * /*from*/, const SpellEntry *spell)
+        void SpellHit(Unit* /*from*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_SUPERCHARGE)
                 DoAction(EVENT_UPDATEPHASE);

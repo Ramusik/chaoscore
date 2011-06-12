@@ -135,7 +135,7 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
 
 bool ChatHandler::HandleSaveCommand(const char* /*args*/)
 {
-    Player *player = m_session->GetPlayer();
+    Player* player = m_session->GetPlayer();
 
     if (player->m_jail_isjailed)
     {

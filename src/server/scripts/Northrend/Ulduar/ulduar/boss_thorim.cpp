@@ -316,13 +316,13 @@ public:
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             if (!(rand()%5))
                 DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2), me);
         }
 
-        void JustDied(Unit * /*victim*/)
+        void JustDied(Unit* /*victim*/)
         {
             DoScriptText(SAY_DEATH, me);
             _JustDied();

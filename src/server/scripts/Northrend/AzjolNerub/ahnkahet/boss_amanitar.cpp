@@ -81,7 +81,7 @@ public:
             }
         }
 
-        void JustDied(Unit * /*Killer*/)
+        void JustDied(Unit* /*Killer*/)
         {
             if (pInstance)
             {
@@ -108,7 +108,7 @@ public:
                     }
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             if (pInstance)
                 pInstance->SetData(DATA_AMANITAR_EVENT, IN_PROGRESS);
@@ -233,8 +233,8 @@ public:
                 DoCast(me, SPELL_HEALTHY_MUSHROOM_POTENT_FUNGUS, true);
         }
 
-        void EnterCombat(Unit * /*who*/) {}
-        void AttackStart(Unit * /*victim*/) {}
+        void EnterCombat(Unit* /*who*/) {}
+        void AttackStart(Unit* /*victim*/) {}
 
         void UpdateAI(const uint32 diff)
         {

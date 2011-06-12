@@ -246,7 +246,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit * victim)
+        void KilledUnit(Unit* victim)
         {
             if (victim == me)
                 return;

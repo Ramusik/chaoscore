@@ -471,7 +471,7 @@ struct Position
         { return GetExactDistSq(pos) < dist * dist; }
     bool HasInArc(float arcangle, const Position *pos) const;
     bool HasInArc(const float arcangle, const float x, const float y) const;
-    bool HasInLine(const Unit *target, float distance, float width) const;
+    bool HasInLine(const Unit* target, float distance, float width) const;
     std::string ToString() const;
 };
 ByteBuffer &operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const & streamer);

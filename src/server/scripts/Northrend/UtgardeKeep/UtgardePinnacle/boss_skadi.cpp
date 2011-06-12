@@ -306,7 +306,7 @@ public:
             Summons.Despawn(pSummoned);
         }
 
-        void SpellHit(Unit * /*caster*/, const SpellEntry *spell)
+        void SpellHit(Unit* /*caster*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_HARPOON_DAMAGE && Phase == FLYING)
             {
@@ -546,7 +546,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             DoScriptText(RAND(SAY_KILL_1, SAY_KILL_2, SAY_KILL_3), me);
         }
