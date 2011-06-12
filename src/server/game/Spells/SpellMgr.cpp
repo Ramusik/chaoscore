@@ -3691,6 +3691,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_TRIGGERED;
             ++count;
             break;
+        case 31117: // Unstable Affliction
+	            // we need this because spell implemented wrong
+	            // it should be done through aura proc with new procEx for dispel
+	            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_FIXED_DAMAGE;
+	            ++count;
+	            break;
         case 16007: // Draco-Incarcinatrix 900
             // was 46, but effect is aura effect
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_NEARBY_ENTRY;
@@ -3763,6 +3769,15 @@ void SpellMgr::LoadSpellCustomAttr()
         case 45761: // Shoot
         case 42611: // Shoot
         case 61588: // Blazing Harpoon
+        case 50988: // Glare of the Tribunal (N)
+        case 59870: // Glare of the Tribunal (H)
+        case 55927: // Sear Beam (N)
+        case 59509: // Sear Beam (H)
+        case 56397: // Arcane Barrage
+        case 64599: // Arcane Barrage
+        case 64607: // Arcane Barrage
+        case 47731: // Critter
+        case 62301: // Cosmic Smash
             spellInfo->MaxAffectedTargets = 1;
             ++count;
             break;
@@ -3784,8 +3799,13 @@ void SpellMgr::LoadSpellCustomAttr()
         case 54172: // Divine Storm (heal)
         case 29213: // Curse of the Plaguebringer - Noth
         case 28542: // Life Drain - Sapphiron
+        case 41357: // L1 Acane Charge
         case 66588: // Flaming Spear
         case 54171: // Divine Storm
+        case 60939: // Surge of Power
+        case 61693: // Arcane Storm
+        case 64598: // Cosmic Smash
+        case 61916: // Lightning Whirl (10N)
             spellInfo->MaxAffectedTargets = 3;
             ++count;
             break;
@@ -3801,6 +3821,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 45641: // Fire Bloom
         case 55665: // Life Drain - Sapphiron (H)
         case 28796: // Poison Bolt Volly - Faerlina
+        case 29232: // Fungal Creep - Loatheb Spore - Dont know if needed
         case 5484:  // Howl Of Terror (Warlock)
             spellInfo->MaxAffectedTargets = 5;
             ++count;
@@ -3811,6 +3832,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 40861: // Wicked Beam
         case 54835: // Curse of the Plaguebringer - Noth (H)
         case 54098: // Poison Bolt Volly - Faerlina (H)
+        case 61694: // Arcane Storm
+        case 63482: // Lightning Whirl (25N)
             spellInfo->MaxAffectedTargets = 10;
             ++count;
             break;
@@ -4305,6 +4328,33 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->SpellFamilyFlags[0] |= 0x40;
                 ++count;
                 break;
+            case SPELLFAMILY_WARLOCK:
+               switch(spellInfo->Id)
+               {
+                   //corruption should be affected by everlasting affliction
+                   case 172: 
+                   case 6222: 
+                   case 6223: 
+                   case 7648:
+                   case 11671: 
+                   case 11672: 
+                   case 25311:
+                   case 27216: 
+                   case 47812: 
+                   case 47813: //Corruption spellIDs
+                       spellInfo->SpellFamilyFlags[1] |= 256;
+                       ++count;
+                       break;
+               }
+               break;
+           case SPELLFAMILY_PRIEST:
+               // Twin Disciplines should affect at Prayer of Mending
+               if (spellInfo->SpellIconID == 2292)
+                   spellInfo->EffectSpellClassMask[0][1] |= 0x20;
+               else
+                   break;
+               ++count;
+               break;
         }
     }
 
