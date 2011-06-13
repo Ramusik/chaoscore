@@ -39,8 +39,6 @@
 #include "SpellAuraEffects.h"
 #include "Util.h"
 #include "ScriptMgr.h"
-//Playerbot mod
-#include "PlayerbotAI.h"
 
 bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
 {
@@ -290,17 +288,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 return;
             }
 
-            //Playerbot mod: handle whispered command to bot
-            if(player->GetPlayerbotAI())
-            {
-                player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
-                GetPlayer()->m_speakTime = 0;
-                GetPlayer()->m_speakCount = 0;
-            }
-            else {
-            //end Playerbot mod
-                GetPlayer()->Whisper(msg, lang, player->GetGUID());
-            }
+            GetPlayer()->Whisper(msg, lang, player->GetGUID());
         } break;
         case CHAT_MSG_PARTY:
         case CHAT_MSG_PARTY_LEADER:
@@ -318,20 +306,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 return;
 
             sScriptMgr->OnPlayerChat(GetPlayer(), type, lang, msg, group);
-
-            //Playerbot mod: broadcast message to bot members
-            Player *player;
-            for(GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-            {
-                player = itr->getSource();
-                if(player && player->GetPlayerbotAI())
-                {
-                    player->GetPlayerbotAI()->HandleCommand(msg, *GetPlayer());
-                    GetPlayer()->m_speakTime = 0;
-                    GetPlayer()->m_speakCount = 0;
-                }
-            }
-//end Playerbot mod
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, uint8(type), lang, NULL, 0, msg.c_str(), NULL);
