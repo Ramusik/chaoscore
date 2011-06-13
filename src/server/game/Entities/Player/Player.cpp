@@ -21477,7 +21477,7 @@ void Player::InitPrimaryProfessions()
             if(HasSkill(skill_id))
             {
                 ++prof_count;
-                if(prof_count > 2)
+                if(prof_count > sWorld->getIntConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL))
                 {
                     SetSkill(skill_id,0 , 0, 0);
                     sLog->outError("Player %s has more than two professions. Skill %u removed",GetName(),skill_id);
