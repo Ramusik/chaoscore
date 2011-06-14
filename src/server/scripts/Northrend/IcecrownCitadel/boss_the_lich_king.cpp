@@ -24,7 +24,7 @@
 #include "Group.h"
 #include "MapManager.h"
 
-#define GOSSIP_MENU 10600
+#define GOSSIP_MENU 10700
 #define GOSSIP_START_EVENT "We are prepared, Highlord. Let us battle for the fate of Azeroth! For the light of dawn!"
 
 enum eAchievements
