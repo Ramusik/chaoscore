@@ -3231,6 +3231,7 @@ public:
         npc_keeper_helpAI(Creature *c) : Scripted_NoMovementAI(c)
         {
             m_pInstance = c->GetInstanceScript();
+            me->setFaction(35);
         }
 
         InstanceScript* m_pInstance;
