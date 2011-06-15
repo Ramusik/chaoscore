@@ -43,6 +43,7 @@ public:
         uint64 uiLeviathanGUID;
         uint64 uiLeviathanGateGUID;
         std::list<uint64> uiLeviathanDoorGUIDList;
+        uint64 XTToyPileGUIDs[4];
 
         // Ignis
         uint64 uiIgnisGUID;
@@ -56,7 +57,6 @@ public:
         // XT-002
         uint64 uiXT002GUID;
         uint64 uiXT002DoorGUID;
-		uint64 XTToyPileGUIDs[4];
 
         // Assembly of Iron
         uint64 uiAssemblyGUIDs[3];
@@ -209,8 +209,8 @@ public:
 
             memset(uiEncounter, 0, sizeof(uiEncounter));
             memset(uiAssemblyGUIDs, 0, sizeof(uiAssemblyGUIDs));
+            memset(XTToyPileGUIDs, 0, sizeof(XTToyPileGUIDs));
             memset(uiRazorHarpoonGUIDs, 0, sizeof(uiRazorHarpoonGUIDs));
-			memset(XTToyPileGUIDs, 0, sizeof(XTToyPileGUIDs));
         }
 
         bool IsEncounterInProgress() const
@@ -375,7 +375,7 @@ public:
                 case NPC_XT002:
                     uiXT002GUID = creature->GetGUID();
                     break;
-				case NPC_XT_TOY_PILE:
+                case NPC_XT_TOY_PILE:
                     for (uint8 i = 0; i < 4; ++i)
                         if (!XTToyPileGUIDs[i])
                             XTToyPileGUIDs[i] = creature->GetGUID();
@@ -767,18 +767,16 @@ public:
                     HandleGameObject(uiHodirEntranceDoorGUID, state != IN_PROGRESS);
                     break;
                 case TYPE_THORIM:
-                    if (state == DONE)
-                        if (GameObject* go = instance->GetGameObject(uiThorimChestGUID))
-                            go->SetRespawnTime(go->GetRespawnDelay());
-
+                    //if (state == DONE)
+                    //    if (GameObject* go = instance->GetGameObject(uiThorimChestGUID))
+                    //        go->SetRespawnTime(go->GetRespawnDelay());
                     if (GameObject* obj = instance->GetGameObject(uiThorimDoorGUID))
                         obj->SetGoState(state == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
-
                     break;
                 case TYPE_FREYA:
-                    if (state == DONE)
-                        if (GameObject* go = instance->GetGameObject(uiFreyaChestGUID))
-                            go->SetRespawnTime(go->GetRespawnDelay());
+                    //if (state == DONE)
+                    //    if (GameObject* go = instance->GetGameObject(uiFreyaChestGUID))
+                    //        go->SetRespawnTime(go->GetRespawnDelay());
                     break;
                 case TYPE_ALGALON:
                     switch (state)
@@ -906,10 +904,6 @@ public:
                 case TYPE_RAZORSCALE:           return uiRazorscaleGUID;
                 case DATA_RAZORSCALE_CONTROL:   return uiRazorscaleController;
                 case TYPE_XT002:                return uiXT002GUID;
-                case DATA_TOY_PILE_0:
-                case DATA_TOY_PILE_1:
-                case DATA_TOY_PILE_2:
-                case DATA_TOY_PILE_3:           return XTToyPileGUIDs[data - DATA_TOY_PILE_0];
                 case TYPE_KOLOGARN:             return uiKologarnGUID;
                 case DATA_LEFT_ARM:             return uiLeftArmGUID;
                 case DATA_RIGHT_ARM:            return uiRightArmGUID;
@@ -920,6 +914,11 @@ public:
                 case DATA_VX_001:               return uiVX001GUID;
                 case DATA_AERIAL_UNIT:          return uiAerialUnitGUID;
                 case DATA_MAGNETIC_CORE:        return uiMagneticCoreGUID;
+                case DATA_TOY_PILE_0:
+                case DATA_TOY_PILE_1:
+                case DATA_TOY_PILE_2:
+                case DATA_TOY_PILE_3:
+                    return XTToyPileGUIDs[data - DATA_TOY_PILE_0];
 
                 case TYPE_HODIR:                return uiHodirGUID;
 

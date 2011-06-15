@@ -162,7 +162,7 @@ class boss_kologarn : public CreatureScript
                 me->SetReactState(REACT_DEFENSIVE);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit * /*victim*/)
             {
                 DoScriptText(SAY_DEATH, me);
                 DoCast(SPELL_KOLOGARN_PACIFY);
@@ -546,7 +546,7 @@ class spell_ulduar_stone_grip_cast_target : public SpellScriptLoader
 
             void HandleForceCast(SpellEffIndex i)
             {
-                Player* plr = GetHitPlayer();
+                Player * plr = GetHitPlayer();
                 if (!plr)
                     return;
 

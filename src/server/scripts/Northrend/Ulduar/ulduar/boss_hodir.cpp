@@ -172,7 +172,6 @@ public:
 
         void JustDied(Unit * /*victim*/)
         {
-            _JustDied();
             DoScriptText(SAY_DEATH, me);
         
             me->setFaction(35);
@@ -197,6 +196,7 @@ public:
                     instance->SetData(DATA_HODIR_RARE_CHEST, GO_STATE_READY);
                 }
             }
+            _JustDied();
         }
 
         void EnterCombat(Unit* /*pWho*/)

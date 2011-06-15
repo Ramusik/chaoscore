@@ -194,8 +194,8 @@ enum ThorimChests
 {
     CACHE_OF_STORMS_10                          = 194312,
     CACHE_OF_STORMS_HARDMODE_10                 = 194313,
-    CACHE_OF_STORMS_25                          = 194314,
-    CACHE_OF_STORMS_HARDMODE_25                 = 194315
+    CACHE_OF_STORMS_25                          = 194315,
+    CACHE_OF_STORMS_HARDMODE_25                 = 194314
 };
 
 const Position Pos[7] =
@@ -325,13 +325,13 @@ public:
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
             if (!(rand()%5))
                 DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
             DoScriptText(SAY_DEATH, me);
             _JustDied();
@@ -947,9 +947,11 @@ class npc_runic_smash : public CreatureScript
                 }
                 else ExplodeTimer -= diff;
             }
+
         private:
             uint32 ExplodeTimer;
         };
+
 
         CreatureAI* GetAI(Creature* creature) const
         {
@@ -964,7 +966,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_ancient_rune_giantAI(creature);	
+        return new npc_ancient_rune_giantAI(creature);
     }
 
     struct npc_ancient_rune_giantAI : public ScriptedAI
@@ -1030,7 +1032,7 @@ public:
         
             if (DetonationTimer <= diff)
             {
-                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                     DoCast(target, SPELL_RUNE_DETONATION);
                 DetonationTimer = urand(10000, 12000);
             }
@@ -1048,12 +1050,12 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_sifAI (creature);
+        return new npc_sifAI(creature);
     }
 
     struct npc_sifAI : public ScriptedAI
     {
-        npc_sifAI(Creature *pCreature) : ScriptedAI(pCreature)
+        npc_sifAI(Creature* creature) : ScriptedAI(creature)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
         }
@@ -1078,7 +1080,7 @@ public:
             
             if (FrostTimer <= diff)
             {
-                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
                     DoCast(target, SPELL_FROSTBOLT);
                 FrostTimer = 4000;
             }
@@ -1086,7 +1088,7 @@ public:
             
             if (VolleyTimer <= diff)
             {
-                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                 {
                     DoResetThreat();
                     me->AddThreat(target, 5000000.0f);

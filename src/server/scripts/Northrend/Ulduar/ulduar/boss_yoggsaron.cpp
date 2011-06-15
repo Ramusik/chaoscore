@@ -3311,6 +3311,7 @@ UPDATE creature_template SET modelid1 = 17612, modelid2 = 17612 WHERE entry = 33
 UPDATE creature_template SET minlevel = 80, maxlevel = 80, scriptname = 'npc_laughting_skull' WHERE entry = 33990;
 UPDATE creature_template SET modelid1 = 15880, modelid2 = 15880 WHERE entry = 33990;
 UPDATE creature_template SET scriptname = 'npc_keeper_help' WHERE entry IN(33241,33244,33242,33213);
+UPDATE `creature_template` SET `minlevel`=80  , `maxlevel`=80 WHERE `entry` = 33943;
 
 UPDATE gameobject_template SET scriptname = 'go_flee_to_surface' WHERE entry = 194625;
 UPDATE item_template SET scriptname = 'item_unbound_fragments_of_valanyr' WHERE entry = 45896;
