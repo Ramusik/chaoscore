@@ -246,15 +246,7 @@ HostileReference* ThreatContainer::addThreat(Unit* pVictim, float fThreat)
 void ThreatContainer::modifyThreatPercent(Unit *pVictim, int32 iPercent)
 {
     if (HostileReference* ref = getReferenceByTarget(pVictim))
-    {
-        if (iPercent < -100)
-        {
-            ref->removeReference();
-            delete ref;
-        }
-        else
-            ref->addThreatPercent(iPercent);
-    }
+        ref->addThreatPercent(iPercent);
 }
 
 //============================================================

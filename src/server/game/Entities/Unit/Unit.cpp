@@ -53,7 +53,6 @@
 #include "TemporarySummon.h"
 #include "Vehicle.h"
 #include "Transport.h"
-#include "PathInfo.h"
 #include "InstanceScript.h"
 
 #include <math.h>
@@ -261,7 +260,7 @@ void Unit::Update(uint32 p_time)
         SendThreatListUpdate();
 
     // update combat timer only for players and pets (only pets with PetAI)
-    if (isInCombat() && GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || (ToCreature()->isPet() && IsControlledByPlayer())))
     {
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
@@ -12141,7 +12140,6 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
         SetInCombatWith(target);
         target->SetInCombatWith(this);
     }
-	
     Unit *who = target->GetCharmerOrOwnerOrSelf();
     if (who->GetTypeId() == TYPEID_PLAYER)
       SetContestedPvP(who->ToPlayer());
@@ -12937,23 +12935,6 @@ Unit* Creature::SelectVictim()
     if (target && _IsTargetAcceptable(target))
     {
         SetInFront(target);
-        if (!GetMotionMaster()->isReachable())
-        {
-            RemoveAurasDueToSpell(SPELL_AURA_MOD_TAUNT);
-            if(m_ThreatManager.getThreatList().size() < 2)
-            {
-                ((Creature*)this)->AI()->EnterEvadeMode();
-            }
-            else
-            {
-                getHostileRefManager().deleteReference(target);
-                m_ThreatManager.modifyThreatPercent(target, -101);
-
-                _removeAttacker(target);
-            }
-
-            return false;
-        }
         return target;
     }
 
@@ -17329,96 +17310,6 @@ uint32 Unit::GetRemainingPeriodicAmount(uint64 caster, uint32 spellId, AuraType 
 
     return amount;
 }
-
-void Unit::MonsterMoveByPath(float x, float y, float z, uint32 speed, bool smoothPath)
-{
-    PathInfo path(this, x, y, z, !smoothPath, true);
-    PointPath pointPath = path.getFullPath();
-
-    uint32 traveltime = uint32(pointPath.GetTotalLength() / float(speed));
-    MonsterMoveByPath(pointPath, 1, pointPath.size(), traveltime);
-}
-
-template<typename PathElem, typename PathNode>
-void Unit::MonsterMoveByPath(Path<PathElem,PathNode> const& path, uint32 start, uint32 end, uint32 transitTime)
-{
-    SplineFlags flags = GetTypeId() == TYPEID_PLAYER ? SPLINEFLAG_WALKING : SplineFlags(((Creature*)this)->GetUnitMovementFlags());
-    SetUnitMovementFlags(flags);
-    SendMonsterMoveByPath(path, start, end, transitTime);
-}
-
-template void Unit::MonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, uint32);
-
-template<typename Elem, typename Node>
-void Unit::SendMonsterMoveByPath(Path<Elem,Node> const& path, uint32 start, uint32 end, uint32 traveltime)
-{
-    uint32 pathSize = end - start;
-
-    if (pathSize < 1)
-    {
-        SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(), 0);
-        return;
-    }
-
-    if (pathSize == 1)
-    {
-        SendMonsterMove(path[start].x, path[start].y, path[start].z, traveltime);
-        return;
-    }
-
-    SplineFlags flags = HasUnitMovementFlag(MOVEMENTFLAG_LEVITATING)
-        || isInFlight() ? HasUnitMovementFlag(SPLINEFLAG_FLYING|SPLINEFLAG_CATMULL_ROM)
-        ? SPLINEFLAG_FLYING : SPLINEFLAG_UNKNOWN26
-        : SPLINEFLAG_WALKING;
-
-    uint32 packSize = (GetUnitMovementFlags() & SplineFlags(SPLINEFLAG_FLYING | SPLINEFLAG_CATMULL_ROM)) ? pathSize*4*3 : 4*3 + (pathSize-1)*4;
-    WorldPacket data( SMSG_MONSTER_MOVE, (GetPackGUID().size()+1+4+4+4+4+1+4+4+4+packSize) );
-    data.append(GetPackGUID());
-    data << uint8(0);
-    data << GetPositionX();
-    data << GetPositionY();
-    data << GetPositionZ();
-    data << uint32(getMSTime());
-    data << uint8(0);
-    data << uint32(flags);
-    data << uint32(traveltime);
-    data << uint32(pathSize);
-
-    if (GetUnitMovementFlags() & SplineFlags(SPLINEFLAG_FLYING | SPLINEFLAG_CATMULL_ROM))
-    {
-        // sending a taxi flight path
-        for (uint32 i = start; i < end; ++i)
-        {
-            data << float(path[i].x);
-            data << float(path[i].y);
-            data << float(path[i].z);
-        }
-    }
-    else
-    {
-        // sending a series of points
-
-        // destination
-        data << path[end-1].x;
-        data << path[end-1].y;
-        data << path[end-1].z;
-
-        // all other points are relative to the center of the path
-        float mid_X = (GetPositionX() + path[end-1].x) * 0.5f;
-        float mid_Y = (GetPositionY() + path[end-1].y) * 0.5f;
-        float mid_Z = (GetPositionZ() + path[end-1].z) * 0.5f;
-
-        for (uint32 i = start; i < end - 1; ++i)
-        {
-            data.appendPackXYZ(mid_X - path[i].x, mid_Y - path[i].y, mid_Z - path[i].z);
-        }
-    }
-
-    SendMessageToSet(&data, true);
-}
-
-template void Unit::SendMonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, uint32);
-template void Unit::SendMonsterMoveByPath<TaxiPathNodePtr, const TaxiPathNodeEntry>(const Path<TaxiPathNodePtr, const TaxiPathNodeEntry> &, uint32, uint32, uint32);
 
 void Unit::SendClearTarget()
 {
