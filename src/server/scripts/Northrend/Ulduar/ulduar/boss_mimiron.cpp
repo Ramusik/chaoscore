@@ -240,50 +240,47 @@ public:
 
         void Reset()
         {
-            //if(instance && instance->GetBossState(TYPE_MIMIRON) != DONE)
-            //if(me->getFaction() != 35)
+            if (me->getFaction() == 35)
+                return;
+
+            _Reset();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USESTANDING);
+            me->SetVisible(true);
+            me->ExitVehicle();
+            me->GetMotionMaster()->MoveTargetedHome();
+
+            instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_ACTIVE);
+
+            for (uint8 data = DATA_LEVIATHAN_MK_II; data <= DATA_AERIAL_UNIT; ++data)
+                if (Creature* creature = me->GetCreature(*me, instance->GetData64(data)))
+                    if (creature->isAlive())
+                    {
+                        creature->ExitVehicle();
+                        creature->AI()->EnterEvadeMode();
+                    }
+
+            phase = PHASE_NULL;
+            uiStep = 0;
+            uiPhase_timer = -1;
+            uiBotTimer = 0;
+            MimironHardMode = false;
+            checkBotAlive = true;
+            Enraged = false;
+            DespawnCreatures(34362, 100);
+            DespawnCreatures(NPC_ROCKET, 100);
+
+            if (GameObject* go = me->FindNearestGameObject(GO_BIG_RED_BUTTON, 200))
             {
-                _Reset();
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USESTANDING);
-                me->SetVisible(true);
-                me->ExitVehicle();
-                me->GetMotionMaster()->MoveTargetedHome();
-
-                instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_ACTIVE);
-                instance->SetBossState(TYPE_MIMIRON, FAIL);
-
-                for (uint8 data = DATA_LEVIATHAN_MK_II; data <= DATA_AERIAL_UNIT; ++data)
-                    if (Creature* creature = me->GetCreature(*me, instance->GetData64(data)))
-                        if (creature->isAlive())
-                        {
-                            creature->ExitVehicle();
-                            creature->AI()->EnterEvadeMode();
-                        }
-
-                phase = PHASE_NULL;
-                uiStep = 0;
-                uiPhase_timer = -1;
-                uiBotTimer = 0;
-                MimironHardMode = false;
-                checkBotAlive = true;
-                Enraged = false;
-                DespawnCreatures(34362, 100);
-                DespawnCreatures(NPC_ROCKET, 100);
-
-                if (GameObject* go = me->FindNearestGameObject(GO_BIG_RED_BUTTON, 200))
-                {
-                    go->SetGoState(GO_STATE_READY);
-                    go->SetLootState(GO_JUST_DEACTIVATED);
-                    go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
-                }
+                go->SetGoState(GO_STATE_READY);
+                go->SetLootState(GO_JUST_DEACTIVATED);
+                go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
             }
         }
 
-        void EndEncounter(/*Unit *victim*/)
+        void EndEncounter()
         {
             DoScriptText(SAY_V07TRON_DEATH, me);
-            //_JustDied();
 
             me->setFaction(35);
             instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, 33432);
@@ -300,6 +297,7 @@ public:
                 {
                     me->SummonGameObject(RAID_MODE(CACHE_OF_INNOVATION_10, CACHE_OF_INNOVATION_25), 2744.65f, 2569.46f, 364.314f, 3.14159f, 0, 0, 0.7f, 0.7f, 604800);
                 }
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_LEVIATHAN_MKII, 1);
             }
 
             EnterEvadeMode();
@@ -844,7 +842,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(!UpdateVictim())
+            if (!UpdateVictim())
                 return;
 
             events.Update(diff);
