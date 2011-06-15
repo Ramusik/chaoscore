@@ -177,7 +177,8 @@ class boss_kologarn : public CreatureScript
 
             void KilledUnit(Unit* /*who*/)
             {
-                DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
+                if (!(rand()%3))
+                    DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
             }
 
             void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)

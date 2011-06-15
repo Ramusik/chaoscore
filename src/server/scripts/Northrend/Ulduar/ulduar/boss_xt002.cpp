@@ -407,6 +407,7 @@ class boss_xt002 : public CreatureScript
                         transferHealth = (heart->GetMaxHealth() - heart->GetHealth());
 
                     me->ModifyHealth(-((int32)transferHealth));
+                    me->LowerPlayerDamageReq(transferHealth);
                 }
             }
         };

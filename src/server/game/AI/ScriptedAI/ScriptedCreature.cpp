@@ -447,7 +447,8 @@ enum eNPCs
     NPC_BROODLORD   = 12017,
     NPC_VOID_REAVER = 19516,
     NPC_JAN_ALAI    = 23578,
-    NPC_SARTHARION  = 28860
+    NPC_SARTHARION  = 28860,
+    NPC_LEVIATHAN   = 33113
 };
 
 // Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
@@ -469,9 +470,9 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
     float fY = me->GetPositionY();
     float fZ = me->GetPositionZ();
 
-    switch(me->GetEntry())
+    switch (me->GetEntry())
     {
-        case NPC_BROODLORD:                                         // broodlord (not move down stairs)
+        case NPC_BROODLORD:                                           // broodlord (not move down stairs)
             if (fZ > 448.60f)
                 return false;
             break;
@@ -479,12 +480,16 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
             if (me->GetDistance2d(432.59f, 371.93f) < 105.0f)
                 return false;
             break;
-        case NPC_JAN_ALAI:                                         // jan'alai (calculate by Z)
+        case NPC_JAN_ALAI:                                            // jan'alai (calculate by Z)
             if (fZ > 12.0f)
                 return false;
             break;
-        case NPC_SARTHARION:                                         // sartharion (calculate box)
+        case NPC_SARTHARION:                                          // sartharion (calculate box)
             if (fX > 3218.86f && fX < 3275.69f && fY < 572.40f && fY > 484.68f)
+                return false;
+            break;
+        case NPC_LEVIATHAN:                                          // flame leviathan (calculate box)
+            if (fX > 145.14f && fX < 447.26f && fY < 83.29f && fY > -149.73f)
                 return false;
             break;
         default:

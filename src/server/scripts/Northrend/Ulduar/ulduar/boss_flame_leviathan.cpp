@@ -109,13 +109,12 @@ enum Events
     EVENT_MISSILE           = 2,
     EVENT_VENT              = 3,
     EVENT_SPEED             = 4,
-    EVENT_SUMMON            = 5,
-    EVENT_SHUTDOWN          = 6,
-    EVENT_REPAIR            = 7,
-    EVENT_THORIM_S_HAMMER   = 8,    // Tower of Storms
-    EVENT_MIMIRON_S_INFERNO = 9,    // Tower of Flames
-    EVENT_HODIR_S_FURY      = 10,   // Tower of Frost
-    EVENT_FREYA_S_WARD      = 11,   // Tower of Nature
+    EVENT_SHUTDOWN          = 5,
+    EVENT_REPAIR            = 6,
+    EVENT_THORIM_S_HAMMER   = 7,    // Tower of Storms
+    EVENT_MIMIRON_S_INFERNO = 8,    // Tower of Flames
+    EVENT_HODIR_S_FURY      = 9,    // Tower of Frost
+    EVENT_FREYA_S_WARD      = 10,   // Tower of Nature
 };
 
 enum Seats
@@ -222,6 +221,11 @@ class boss_flame_leviathan : public CreatureScript
         {
             boss_flame_leviathanAI(Creature* creature) : BossAI(creature, TYPE_LEVIATHAN), vehicle(creature->GetVehicleKit())
             {
+                // temporary disable vehicle hp scaling effect, nyi
+                //SpellEntry* tempSpell;
+                //tempSpell = GET_SPELL(65266);
+                //if (tempSpell)
+                //    tempSpell->Effect[2] = 0;
             }
 
             void InitializeAI()
@@ -262,11 +266,13 @@ class boss_flame_leviathan : public CreatureScript
             bool towerOfFrost;
             bool Shutout;
             bool Unbroken;
+            bool Pursued;
 
             void Reset()
             {
                 _Reset();
                 Shutdown = 0;
+                Pursued = false;
                 me->SetReactState(REACT_DEFENSIVE);
             }
 
@@ -279,8 +285,7 @@ class boss_flame_leviathan : public CreatureScript
                 events.ScheduleEvent(EVENT_VENT, 20*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_SUMMON, 1*IN_MILLISECONDS);
-                ActiveTower(); //void ActiveTower
+                ActiveTower();
                 vehicle->InstallAllAccessories(false);
             }
 
@@ -425,18 +430,20 @@ class boss_flame_leviathan : public CreatureScript
                 if (me->HasUnitState(UNIT_STAT_CASTING) || me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
                     return;
 
-                if (me->getVictim() && !me->getVictim()->HasAura(SPELL_PURSUED))
-                    events.RescheduleEvent(EVENT_PURSUE, 0);
+                if (!Pursued && me->getVictim() && !me->getVictim()->HasAura(SPELL_PURSUED))
+                {
+                    Pursued = true;
+                    events.RescheduleEvent(EVENT_PURSUE, 1000);
+                }
 
                 uint32 eventId = events.GetEvent();
 
                 switch (eventId)
                 {
-                    case 0:
-                        break; // this is a must
                     case EVENT_PURSUE:
                         DoScriptText(RAND(SAY_TARGET_1, SAY_TARGET_2, SAY_TARGET_3), me);
                         DoCast(SPELL_PURSUED);
+                        Pursued = false;
                         events.RepeatEvent(30*IN_MILLISECONDS);
                         break;
                     case EVENT_MISSILE:
@@ -451,12 +458,6 @@ class boss_flame_leviathan : public CreatureScript
                     case EVENT_SPEED:
                         DoCastAOE(SPELL_GATHERING_SPEED);
                         events.RepeatEvent(15*IN_MILLISECONDS);
-                        break;
-                    case EVENT_SUMMON:
-                        if (summons.size() < 15)
-                            if (Creature* lift = DoSummonFlyer(NPC_MECHANOLIFT, me, 30.0f, 50.0f, 0))
-                                lift->GetMotionMaster()->MoveRandom(100);
-                        events.RepeatEvent(2*IN_MILLISECONDS);
                         break;
                     case EVENT_SHUTDOWN:
                         DoScriptText(RAND(SAY_OVERLOAD_1, SAY_OVERLOAD_2, SAY_OVERLOAD_3), me);
@@ -510,14 +511,13 @@ class boss_flame_leviathan : public CreatureScript
                             DoCast(target, SPELL_FREYA_S_WARD);
                         events.CancelEvent(EVENT_FREYA_S_WARD);
                         break;
-                    default:
-                        events.PopEvent();
-                        break;
                 }
 
                 if (me->IsWithinMeleeRange(me->getVictim())) // bugged spell casts on units that are boarded on leviathan
                     DoSpellAttackIfReady(SPELL_BATTERING_RAM);
                 DoMeleeAttackIfReady();
+
+                EnterEvadeIfOutOfCombatArea(diff);
             }
 
             void StartFreyaEvent()//summon these 4 on each corner wich wil spawn additional hostile mobs
@@ -543,6 +543,7 @@ class boss_flame_leviathan : public CreatureScript
                     }
                 }
 
+                /*
                 if (action && action <= 4) // Tower destruction, debuff leviathan loot and reduce active tower
                 {
                     if (me->HasLootMode(31) && ActiveTowersCount == 4)
@@ -569,7 +570,7 @@ class boss_flame_leviathan : public CreatureScript
 
                 switch (action)
                 {
-                    case 0:  // Activate hard-mode setting counter to 4 towers, enable all towers apply buffs on levithian
+                    case 0: // Activate hard-mode setting counter to 4 towers, enable all towers apply buffs on levithian
                         ActiveTowers = true;
                         towerOfStorms = true;
                         towerOfLife = true;
@@ -592,6 +593,7 @@ class boss_flame_leviathan : public CreatureScript
                     default:
                         break;
                 }
+                */
             }
         };
 
@@ -787,17 +789,25 @@ class npc_mechanolift : public CreatureScript
 
         struct npc_mechanoliftAI : public PassiveAI
         {
-            npc_mechanoliftAI(Creature* creature) : PassiveAI(creature) { }
-
-            void JustDied(Unit * /*killer*/)
+            npc_mechanoliftAI(Creature* creature) : PassiveAI(creature)
             {
-                Creature* liquid = DoSummon(NPC_LIQUID, me, 0, 190000, TEMPSUMMON_TIMED_DESPAWN);
-                if (liquid)
+                me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+            }
+
+            void DamageTaken(Unit* /*who*/, uint32 &damage)
+            {
+                if (damage >= me->GetHealth())
                 {
-                    float x, y, z;
-                    me->GetPosition(x, y, z);
-                    z = me->GetMap()->GetHeight(x, y, MAX_HEIGHT);
-                    liquid->GetMotionMaster()->MovePoint(0, x, y, z);
+                    Creature* liquid = DoSummon(NPC_LIQUID, me, 0, 190000, TEMPSUMMON_TIMED_DESPAWN);
+                    if (liquid)
+                    {
+                        float x, y, z;
+                        me->GetPosition(x, y, z);
+                        z = me->GetMap()->GetHeight(x, y, MAX_HEIGHT);
+                        liquid->GetMotionMaster()->MovePoint(0, x, y, z);
+                    }
+
+                    me->RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
                 }
             }
         };

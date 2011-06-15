@@ -33,7 +33,8 @@ enum Spells
     SPELL_LIGHTNING_RELEASE                     = 62466,
     SPELL_LIGHTNING_PILLAR                      = 62976,
     SPELL_UNBALANCING_STRIKE                    = 62130,
-    SPELL_BERSERK                               = 62560
+    SPELL_BERSERK_PHASE1                        = 62560,
+    SPELL_BERSERK_PHASE2                        = 26662
 };
 
 enum Phases
@@ -417,7 +418,7 @@ public:
                             events.ScheduleEvent(EVENT_SUMMON_ADDS, 10000, 0, PHASE_1);
                             break;
                         case EVENT_BERSERK:
-                            DoCast(me, SPELL_BERSERK);
+                            DoCast(me, SPELL_BERSERK_PHASE1);
                             DoScriptText(SAY_BERSERK, me);
                             events.CancelEvent(EVENT_BERSERK);
                             break;
@@ -452,7 +453,7 @@ public:
                             events.ScheduleEvent(EVENT_TRANSFER_ENERGY, 8000, 0, PHASE_2);
                             break;
                         case EVENT_BERSERK:
-                            DoCast(me, SPELL_BERSERK);
+                            DoCast(me, SPELL_BERSERK_PHASE2);
                             DoScriptText(SAY_BERSERK, me);
                             events.CancelEvent(EVENT_BERSERK);
                             break;
