@@ -92,7 +92,7 @@ enum PreAdds
     MERCENARY_SOLDIER_H
 };
 
-enum  PreAddSpells
+enum PreAddSpells
 {
     SPELL_ACID_BREATH               = 62315,
     SPELL_ACID_BREATH_H             = 62415,
@@ -121,6 +121,7 @@ const uint32 SPELL_PRE_SECONDARY_H[]            = {SPELL_SWEEP_H,   SPELL_HEROIC
 #define SPELL_HOLY_SMITE                        RAID_MODE(62335, 62443)
 
 #define INCREASE_PREADDS_COUNT                  1
+#define ACTION_RUNIC_SMASH                      2
 #define MAX_HARD_MODE_TIME                      180000 // 3 Minutes
 
 // Achievements
@@ -138,8 +139,12 @@ enum ArenaAdds
     IRON_HONOR_GUARD
 };
 
-#define NPC_SIF                                 33196
-#define NPC_POWER_SOURCE                        34055 // bad id
+enum Creatures
+{
+    NPC_SIF                         = 33196,
+    NPC_POWER_SOURCE                = 34055, // bad id
+    NPC_GOLEM_BUNNY                 = 33140  // 33141
+};
 
 const uint32 ARENA_PHASE_ADD[]                  = {32876, 32904, 32878, 32877, 32874, 32875, 33110};
 
@@ -161,7 +166,10 @@ enum RunicSpells
 {
     SPELL_SMASH                                 = 62339,
     SPELL_RUNIC_BARRIER                         = 62338,
-    SPELL_RUNIC_CHARGE                          = 62613
+    SPELL_RUNIC_CHARGE                          = 62613,
+    SPELL_RUNIC_SMASH                           = 62465,
+    SPELL_RUNIC_SMASH_LEFT                      = 62057,
+    SPELL_RUNIC_SMASH_RIGHT                     = 62058
 };
 
 // Ancient Rune Giant (Mini Boss) Spells
@@ -365,6 +373,8 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_ADDS, 20000, 0, PHASE_1);
             events.ScheduleEvent(EVENT_BERSERK, 300000, 0, PHASE_1);
 
+            if (Creature* runic = me->GetCreature(*me, instance->GetData64(DATA_RUNIC_COLOSSUS)))
+                runic->AI()->DoAction(ACTION_RUNIC_SMASH);
             
             if (GameObject* go = me->FindNearestGameObject(GO_LEVER, 500))
                 go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
@@ -764,94 +774,186 @@ public:
 
 class npc_runic_colossus : public CreatureScript
 {
-public:
-    npc_runic_colossus() : CreatureScript("npc_runic_colossus") { }
+    public:
+        npc_runic_colossus() : CreatureScript("npc_runic_colossus") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_runic_colossusAI (pCreature);
-    }
-
-    struct npc_runic_colossusAI : public ScriptedAI
-    {
-        npc_runic_colossusAI(Creature *pCreature) : ScriptedAI(pCreature), summons(me)
+        struct npc_runic_colossusAI : public ScriptedAI
         {
-            pInstance = pCreature->GetInstanceScript();
-            SetImmuneToPushPullEffects(true);
-        }
-
-        InstanceScript* pInstance;
-        SummonList summons;
-        
-        uint32 BarrierTimer;
-        uint32 SmashTimer;
-        uint32 ChargeTimer;
-
-        void Reset()
-        {
-            BarrierTimer = urand(12000, 15000);
-            SmashTimer = urand (15000, 18000);
-            ChargeTimer = urand (20000, 24000);
-        
-            me->GetMotionMaster()->MoveTargetedHome();
-
-            // Runed Door closed
-            if (pInstance)
-                pInstance->SetData(DATA_RUNIC_DOOR, GO_STATE_READY);
-            
-            // Spawn trashes
-            summons.DespawnAll();
-            for (uint8 i = 0; i < 6; i++)
-                me->SummonCreature(colossusAddLocations[i].entry,colossusAddLocations[i].x,colossusAddLocations[i].y,colossusAddLocations[i].z,colossusAddLocations[i].o,TEMPSUMMON_CORPSE_TIMED_DESPAWN,3000);
-        }
-
-        void JustSummoned(Creature *summon)
-        {
-            summons.Summon(summon);
-        }
-
-        void JustDied(Unit* /*victim*/)
-        {
-            // Runed Door opened
-            if (pInstance)
-                pInstance->SetData(DATA_RUNIC_DOOR, GO_STATE_ACTIVE);
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
-                return;
-
-            // TODO: should do some skadi-like shockwave until aggroed
-            // npc 33140, 33141
-    
-            if (BarrierTimer <= diff)
+            npc_runic_colossusAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
-                me->MonsterTextEmote(EMOTE_BARRIER, 0, true);
-                DoCast(me, SPELL_RUNIC_BARRIER);
-                BarrierTimer = urand(35000, 45000);
+                instance = creature->GetInstanceScript();
+                SetImmuneToPushPullEffects(true);
             }
-            else BarrierTimer -= diff;
-        
-            if (SmashTimer <= diff)
+
+            void Reset()
             {
-                DoCast(me, SPELL_SMASH);
+                BarrierTimer = urand(12000, 15000);
                 SmashTimer = urand (15000, 18000);
+                ChargeTimer = urand (20000, 24000);
+
+                RunicSmashPhase = 0;
+                RunicSmashTimer = 1000;
+                Side = 0;
+            
+                me->GetMotionMaster()->MoveTargetedHome();
+
+                // Runed Door closed
+                if (instance)
+                    instance->SetData(DATA_RUNIC_DOOR, GO_STATE_READY);
+                
+                // Spawn trashes
+                summons.DespawnAll();
+                for (uint8 i = 0; i < 6; i++)
+                    me->SummonCreature(colossusAddLocations[i].entry, colossusAddLocations[i].x, colossusAddLocations[i].y, colossusAddLocations[i].z,
+                    colossusAddLocations[i].o, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
             }
-            else SmashTimer -= diff;
-        
-            if (ChargeTimer <= diff)
+
+            void JustSummoned(Creature* summon)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -8, true))
-                    DoCast(target, SPELL_RUNIC_CHARGE);
-                ChargeTimer = 20000;
+                summons.Summon(summon);
             }
-            else ChargeTimer -= diff;
 
-            DoMeleeAttackIfReady();
+            void JustDied(Unit* /*victim*/)
+            {
+                // Runed Door opened
+                if (instance)
+                    instance->SetData(DATA_RUNIC_DOOR, GO_STATE_ACTIVE);
+            }
+
+            void DoAction(int32 const action)
+            {
+                switch (action)
+                {
+                    case ACTION_RUNIC_SMASH:
+                        RunicSmashPhase = 1;
+                        break;
+                }
+            }
+
+            void DoRunicSmash()
+            {
+                for (uint8 i = 0; i < 9; i++)
+                    if (Creature* bunny = me->SummonCreature(NPC_GOLEM_BUNNY, Side ? 2236.0f : 2219.0f, i * 10 - 380.0f, 412.2f, 0, TEMPSUMMON_TIMED_DESPAWN, 5000))
+                        bunny->AI()->SetData(1, (i + 1)* 200);
+
+                for (uint8 i = 0; i < 9; i++)
+                    if (Creature* bunny = me->SummonCreature(NPC_GOLEM_BUNNY, Side ? 2246.0f : 2209.0f, i * 10 - 380.0f, 412.2f, 0, TEMPSUMMON_TIMED_DESPAWN, 5000))
+                        bunny->AI()->SetData(1, (i + 1)* 200);
+            }
+
+            void EnterCombat(Unit* /*who*/)
+            {
+                RunicSmashPhase = 0;
+                me->InterruptNonMeleeSpells(true);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (RunicSmashPhase == 1)
+                {
+                    if (RunicSmashTimer <= diff)
+                    {
+                        Side = urand(0, 1);
+                        DoCast(me, Side ? SPELL_RUNIC_SMASH_LEFT : SPELL_RUNIC_SMASH_RIGHT);
+                        RunicSmashTimer = 1000;
+                        RunicSmashPhase = 2;
+                    }
+                    else RunicSmashTimer -= diff;
+                }
+
+                if (me->HasUnitState(UNIT_STAT_CASTING))
+                    return;
+
+                if (RunicSmashPhase == 2)
+                {
+                    RunicSmashPhase = 1;
+                    DoRunicSmash();
+                }
+
+                if (!UpdateVictim())
+                    return;
+
+                if (BarrierTimer <= diff)
+                {
+                    me->MonsterTextEmote(EMOTE_BARRIER, 0, true);
+                    DoCast(me, SPELL_RUNIC_BARRIER);
+                    BarrierTimer = urand(35000, 45000);
+                }
+                else BarrierTimer -= diff;
+            
+                if (SmashTimer <= diff)
+                {
+                    DoCast(me, SPELL_SMASH);
+                    SmashTimer = urand (15000, 18000);
+                }
+                else SmashTimer -= diff;
+            
+                if (ChargeTimer <= diff)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -8, true))
+                        DoCast(target, SPELL_RUNIC_CHARGE);
+                    ChargeTimer = 20000;
+                }
+                else ChargeTimer -= diff;
+
+                DoMeleeAttackIfReady();
+            }
+
+        private:
+            InstanceScript* instance;
+            SummonList summons;
+
+            uint8 Side;
+            uint8 RunicSmashPhase;
+            uint32 BarrierTimer;
+            uint32 SmashTimer;
+            uint32 ChargeTimer;
+            uint32 RunicSmashTimer;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_runic_colossusAI(creature);
         }
-    };
+};
 
+class npc_runic_smash : public CreatureScript
+{
+    public:
+        npc_runic_smash() : CreatureScript("npc_runic_smash") { }
+
+        struct npc_runic_smashAI : public Scripted_NoMovementAI
+        {
+            npc_runic_smashAI(Creature* creature) : Scripted_NoMovementAI(creature)
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->SetDisplayId(16925);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                ExplodeTimer = 10000;
+            }
+
+            void SetData(uint32 /*type*/, uint32 data)
+            {
+                ExplodeTimer = data;
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (ExplodeTimer <= diff)
+                {
+                    DoCastAOE(SPELL_RUNIC_SMASH, true);
+                    ExplodeTimer = 10000;
+                }
+                else ExplodeTimer -= diff;
+            }
+        private:
+            uint32 ExplodeTimer;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_runic_smashAI(creature);
+        }
 };
 
 class npc_ancient_rune_giant : public CreatureScript
@@ -859,20 +961,20 @@ class npc_ancient_rune_giant : public CreatureScript
 public:
     npc_ancient_rune_giant() : CreatureScript("npc_ancient_rune_giant") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_ancient_rune_giantAI (pCreature);
+        return new npc_ancient_rune_giantAI(creature);	
     }
 
     struct npc_ancient_rune_giantAI : public ScriptedAI
     {
-        npc_ancient_rune_giantAI(Creature *pCreature) : ScriptedAI(pCreature), summons(me)
+        npc_ancient_rune_giantAI(Creature* creature) : ScriptedAI(creature), summons(me)
         {
-            pInstance = pCreature->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             SetImmuneToPushPullEffects(true);
         }
 
-        InstanceScript* pInstance;
+        InstanceScript* instance;
         SummonList summons;
         
         uint32 StompTimer;
@@ -886,8 +988,8 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
 
             // Stone Door closed
-            if (pInstance)
-                pInstance->SetData(DATA_STONE_DOOR, GO_STATE_READY);
+            if (instance)
+                instance->SetData(DATA_STONE_DOOR, GO_STATE_READY);
             
             // Spawn trashes
             summons.DespawnAll();
@@ -909,8 +1011,8 @@ public:
         void JustDied(Unit* /*victim*/)
         {
             // Stone Door opened
-            if (pInstance)
-                pInstance->SetData(DATA_STONE_DOOR, GO_STATE_ACTIVE);
+            if (instance)
+                instance->SetData(DATA_STONE_DOOR, GO_STATE_ACTIVE);
         }
 
         void UpdateAI(const uint32 diff)
@@ -927,8 +1029,8 @@ public:
         
             if (DetonationTimer <= diff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
-                    DoCast(pTarget, SPELL_RUNE_DETONATION);
+                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
+                    DoCast(target, SPELL_RUNE_DETONATION);
                 DetonationTimer = urand(10000, 12000);
             }
             else DetonationTimer -= diff;
@@ -936,7 +1038,6 @@ public:
             DoMeleeAttackIfReady();
         }
     };
-
 };
 
 class npc_sif : public CreatureScript
@@ -944,20 +1045,18 @@ class npc_sif : public CreatureScript
 public:
     npc_sif() : CreatureScript("npc_sif") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_sifAI (pCreature);
+        return new npc_sifAI (creature);
     }
 
     struct npc_sifAI : public ScriptedAI
     {
         npc_sifAI(Creature *pCreature) : ScriptedAI(pCreature)
         {
-            pInstance = pCreature->GetInstanceScript();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
         }
 
-        InstanceScript* pInstance;
         uint32 FrostTimer;
         uint32 VolleyTimer;
         uint32 BlizzardTimer;
@@ -978,19 +1077,19 @@ public:
             
             if (FrostTimer <= diff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
-                    DoCast(pTarget, SPELL_FROSTBOLT);
+                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
+                    DoCast(target, SPELL_FROSTBOLT);
                 FrostTimer = 4000;
             }
             else FrostTimer -= diff;
             
             if (VolleyTimer <= diff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
+                if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                 {
                     DoResetThreat();
                     me->AddThreat(pTarget, 5000000.0f);
-                    DoCast(pTarget, SPELL_FROSTBOLT_VOLLEY, true);
+                    DoCast(target, SPELL_FROSTBOLT_VOLLEY, true);
                 }
                 VolleyTimer = urand(15000, 20000);
             }
@@ -1130,6 +1229,7 @@ void AddSC_boss_thorim()
     new npc_thorim_pre_phase();
     new npc_thorim_arena_phase();
     new npc_runic_colossus();
+    new npc_runic_smash();
     new npc_ancient_rune_giant();
     new npc_sif();
     new spell_stormhammer_targeting();
