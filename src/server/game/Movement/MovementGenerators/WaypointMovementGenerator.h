@@ -30,7 +30,7 @@
 #include "WaypointManager.h"
 #include "Path.h"
 #include "Traveller.h"
-
+#include "PathInfo.h"
 #include "Player.h"
 
 #include <vector>
@@ -73,6 +73,7 @@ class WaypointMovementGenerator
 
         void Initialize(T &);
         void Finalize(T &);
+        void Interrupt(T &) {}
         void MovementInform(T &);
         void InitTraveller(T &, const WaypointData &);
         void GeneratePathId(T &);
@@ -82,6 +83,7 @@ class WaypointMovementGenerator
         MovementGeneratorType GetMovementGeneratorType() { return WAYPOINT_MOTION_TYPE; }
 
     private:
+        void MoveToNextNode(CreatureTraveller &traveller);
         WaypointData *node;
         uint32 path_id;
         TimeTrackerSmall i_nextMoveTime;
@@ -105,6 +107,7 @@ public PathMovementBase<Player, TaxiPathNodeList const*>
         void Initialize(Player &);
         void Reset(Player & /*u*/){};
         void Finalize(Player &);
+        void Interrupt(Player &) {}
         bool Update(Player &, const uint32 &);
         MovementGeneratorType GetMovementGeneratorType() { return FLIGHT_MOTION_TYPE; }
 

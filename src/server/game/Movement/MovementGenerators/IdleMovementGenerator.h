@@ -27,6 +27,7 @@ class IdleMovementGenerator : public MovementGenerator
 
         void Initialize(Unit &);
         void Finalize(Unit &) {  }
+        void Interrupt(Unit &) {}
         void Reset(Unit &);
         bool Update(Unit &, const uint32 &) { return true; }
         MovementGeneratorType GetMovementGeneratorType() { return IDLE_MOTION_TYPE; }
@@ -41,6 +42,7 @@ class RotateMovementGenerator : public MovementGenerator
 
         void Initialize(Unit& owner);
         void Finalize(Unit& owner);
+        void Interrupt(Unit& /*owner*/) {}
         void Reset(Unit& owner) { Initialize(owner); }
         bool Update(Unit& owner, const uint32& time_diff);
         MovementGeneratorType GetMovementGeneratorType() { return ROTATE_MOTION_TYPE; }
@@ -57,6 +59,7 @@ class DistractMovementGenerator : public MovementGenerator
 
         void Initialize(Unit& owner);
         void Finalize(Unit& owner);
+        void Interrupt(Unit& ) {}
         void Reset(Unit& owner) { Initialize(owner); }
         bool Update(Unit& owner, const uint32& time_diff);
         MovementGeneratorType GetMovementGeneratorType() { return DISTRACT_MOTION_TYPE; }
@@ -73,6 +76,7 @@ class AssistanceDistractMovementGenerator : public DistractMovementGenerator
 
         MovementGeneratorType GetMovementGeneratorType() { return ASSISTANCE_DISTRACT_MOTION_TYPE; }
         void Finalize(Unit& unit);
+        void Interrupt(Unit& unit) {}
 };
 
 #endif

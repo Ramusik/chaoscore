@@ -36,6 +36,8 @@ class MovementGenerator
         virtual void Initialize(Unit &) = 0;
         virtual void Finalize(Unit &) = 0;
 
+        virtual void Interrupt(Unit &) = 0;
+
         virtual void Reset(Unit &) = 0;
 
         virtual bool Update(Unit &, const uint32 &time_diff) = 0;
@@ -45,6 +47,9 @@ class MovementGenerator
         virtual void unitSpeedChanged() { }
 
         virtual bool GetDestination(float& /*x*/, float& /*y*/, float& /*z*/) const { return false; }
+
+        // given destination unreachable? due to pathfinsing or other
+        virtual bool IsReachable() const { return true; }
 };
 
 template<class T, class D>
@@ -61,6 +66,11 @@ class MovementGeneratorMedium : public MovementGenerator
             //u->AssertIsType<T>();
             (static_cast<D*>(this))->Finalize(*((T*)&u));
         }
+        void Interrupt(Unit &u)
+        {
+            //u->AssertIsType<T>();
+            (static_cast<D*>(this))->Interrupt(*((T*)&u));
+        }
         void Reset(Unit &u)
         {
             //u->AssertIsType<T>();
@@ -75,6 +85,7 @@ class MovementGeneratorMedium : public MovementGenerator
         // will not link if not overridden in the generators
         void Initialize(T &u);
         void Finalize(T &u);
+        void Interrupt(T &u);
         void Reset(T &u);
         bool Update(T &u, const uint32 &time_diff);
 };
