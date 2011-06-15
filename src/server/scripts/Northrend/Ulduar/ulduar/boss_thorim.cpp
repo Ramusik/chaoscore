@@ -1088,7 +1088,7 @@ public:
                 if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                 {
                     DoResetThreat();
-                    me->AddThreat(pTarget, 5000000.0f);
+                    me->AddThreat(target, 5000000.0f);
                     DoCast(target, SPELL_FROSTBOLT_VOLLEY, true);
                 }
                 VolleyTimer = urand(15000, 20000);

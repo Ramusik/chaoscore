@@ -32,6 +32,13 @@
 6 - Arthas
 */
 
+enum Texts
+{
+    SAY_CRATES_COMPLETED    = 0,
+};
+
+Position const ChromieSummonPos = {1813.298f, 1283.578f, 142.3258f, 3.878161f};
+
 class instance_culling_of_stratholme : public InstanceMapScript
 {
 public:
@@ -52,6 +59,7 @@ public:
         uint64 uiEpoch;
         uint64 uiMalGanis;
         uint64 uiInfinite;
+		uint64 uiChromie;
 
         uint64 uiShkafGate;
         uint64 uiMalGanisGate1;
@@ -60,9 +68,11 @@ public:
         uint64 uiMalGanisChest;
         uint32 uiCountdownTimer;
         uint16 uiCountdownMinute;
-	// Zombiefest!
-	  uint32 zombiesCount;
-	  uint32 zombieFestTimer;
+		uint64 _genericBunnyGUID;
+		uint32 _crateCount;
+		// Zombiefest!
+		uint32 zombiesCount;
+		uint32 zombieFestTimer;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
@@ -77,8 +87,8 @@ public:
             uiCountCrates = 0;
             uiCountdownTimer = 0;
             uiCountdownMinute = 26;
-	       zombiesCount = 0;
-	       zombieFestTimer = 0;
+			zombiesCount = 0;
+			zombieFestTimer = 0;
         }
 
 
@@ -113,6 +123,13 @@ public:
                     uiInfinite = pCreature->GetGUID();
                     pCreature->SetVisible(false);
                     pCreature->setFaction(35);
+                    break;
+				case NPC_GENERIC_BUNNY:
+					_genericBunnyGUID = pCreature->GetGUID();
+                    break;
+				case NPC_CHROMIE:
+					uiChromie = pCreature->GetGUID();
+					pCreature->SetVisible(false);
                     break;
             }
         }
@@ -207,6 +224,10 @@ public:
                             break;
                         case DONE:
                             GiveQuestKillAllInInstance(CREDIT_A_ROYAL_ESCORT);
+							if (Creature* pCreature = instance->GetCreature(uiChromie))
+                            {
+                                pCreature->SetVisible(true);
+                            }
                             HandleGameObject(uiExitGate, true);
                             HandleGameObject(uiMalGanisGate2, true);
                             if (GameObject* pGo = instance->GetGameObject(uiMalGanisChest))
@@ -243,6 +264,21 @@ public:
 	                        zombieFestTimer = 0;
 	                    }
                     break;
+                    case DATA_CRATE_COUNT:
+                        _crateCount = data;
+                        if (_crateCount == 5)
+                        {
+                            if (Creature* bunny = instance->GetCreature(_genericBunnyGUID))
+                                bunny->CastSpell(bunny, SPELL_CRATES_CREDIT, true);
+
+                           /* // Summon Chromie and global whisper
+                            if (Creature* chromie = instance->SummonCreature(NPC_CHROMIE_2, ChromieSummonPos))
+                                if (!instance->GetPlayers().isEmpty())
+                                    if (Player* plr = instance->GetPlayers().getFirst()->getSource())
+                                        sCreatureTextMgr->SendChat(chromie, SAY_CRATES_COMPLETED, plr->GetGUID(), CHAT_TYPE_END, LANG_ADDON, TEXT_RANGE_MAP);*/
+                        }
+						//DoUpdateWorldState(WORLDSTATE_CRATES_REVEALED, _crateCount);
+                        break;
                 case DATA_ARTHAS_EVENT:
                     m_auiEncounter[6] = data;
                     break;
@@ -264,7 +300,8 @@ public:
                 case DATA_INFINITE_EVENT:             return m_auiEncounter[5];
                 case DATA_ARTHAS_EVENT:               return m_auiEncounter[6];
                 case DATA_COUNTDOWN:                  return uiCountdownMinute;
-	           case DATA_ZOMBIEFEST:
+                case DATA_CRATE_COUNT:                return _crateCount;
+	            case DATA_ZOMBIEFEST:
 	                if (zombieFestTimer == 0)
 	                        return ACHI_IS_NOT_STARTED;
 	                    else
