@@ -58,7 +58,7 @@ static Position MageSpawnPos[ENCOUNTER_WAVE_MAGE] =
     {5275.08f, 2008.72f, 707.778f, 6.21337f},
     {5279.65f, 2004.66f, 707.778f, 0.069813f},
     {5275.48f, 2001.14f, 707.778f, 0.174533f},
-    {5316.7f, 2041.55f, 707.778f, 4.50295f},
+    {5316.7f,  2041.55f, 707.778f, 4.50295f},
 };
 
 static Position MercenarySpawnPos[ENCOUNTER_WAVE_MERCENARY] =
@@ -66,7 +66,7 @@ static Position MercenarySpawnPos[ENCOUNTER_WAVE_MERCENARY] =
     {5302.25f, 1972.41f, 707.778f, 1.37881f},
     {5311.03f, 1972.23f, 707.778f, 1.64061f},
     {5277.36f, 1993.23f, 707.778f, 0.401426f},
-    {5318.7f, 2036.11f, 707.778f, 4.2237f},
+    {5318.7f,  2036.11f, 707.778f, 4.2237f},
     {5335.72f, 1996.86f, 707.778f, 2.74017f},
     {5299.43f, 1979.01f, 707.778f, 1.23918f},
 };
@@ -79,7 +79,7 @@ static Position FootmenSpawnPos[ENCOUNTER_WAVE_FOOTMAN] =
     {5343.29f, 1999.38f, 707.778f, 2.9147f},
     {5340.84f, 1992.46f, 707.778f, 2.75762f},
     {5325.07f, 1977.6f, 707.778f, 2.07694f},
-    {5336.6f, 2017.28f, 707.778f, 3.47321f},
+    {5336.6f,  2017.28f, 707.778f, 3.47321f},
     {5313.82f, 1978.15f, 707.778f, 1.74533f},
     {5280.63f, 2012.16f, 707.778f, 6.05629f},
     {5322.96f, 2040.29f, 707.778f, 4.34587f},
@@ -92,7 +92,7 @@ static Position RiflemanSpawnPos[ENCOUNTER_WAVE_RIFLEMAN] =
     {5319.16f, 1974, 707.778f, 1.91986f},
     {5299.25f, 2036, 707.778f, 5.02655f},
     {5295.64f, 1973.76f, 707.778f, 1.18682f},
-    {5282.9f, 2019.6f, 707.778f, 5.88176f},
+    {5282.9f,  2019.6f, 707.778f, 5.88176f},
 };
 
 class instance_halls_of_reflection : public InstanceMapScript
@@ -114,6 +114,8 @@ public:
         uint64 uiLichKing;
         uint64 uiJainaPart1;
         uint64 uiSylvanasPart1;
+        uint64 uiLoralen;
+        uint64 uiKoreln;
         uint64 uiLider;
 
         uint64 uiGunship;
@@ -147,6 +149,8 @@ public:
             uiLichKing = 0;
             uiJainaPart1 = 0;
             uiSylvanasPart1 = 0;
+            uiKoreln = 0;
+            uiLoralen = 0;
             uiLider = 0;
 
             uiGunship = 0;
@@ -209,6 +213,11 @@ public:
                     uiJainaPart1 = creature->GetGUID();
                     uiSylvanasPart1 = creature->GetGUID();                    
                     break;
+                case NPC_KORELN:
+                    if (uiTeamInInstance == HORDE)
+                        creature->UpdateEntry(NPC_LORALEN, HORDE);
+                    uiKoreln = creature->GetGUID();
+                    uiLoralen = creature->GetGUID();
                 case NPC_SYLVANAS_PART1:
                     uiSylvanasPart1 = creature->GetGUID();
                     break;

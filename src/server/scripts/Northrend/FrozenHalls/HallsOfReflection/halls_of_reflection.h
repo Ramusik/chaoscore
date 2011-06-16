@@ -67,6 +67,8 @@ enum Creatures
     NPC_JAINA_OUTRO                               = 36955,
     NPC_SYLVANAS_PART1                            = 37223,
     NPC_SYLVANA_OUTRO                             = 37554,
+    NPC_KORELN                                    = 37582,
+    NPC_LORALEN                                     = 37779,
     NPC_BARTLETT                                  = 37182,
     NPC_KORM                                      = 37833,
 
