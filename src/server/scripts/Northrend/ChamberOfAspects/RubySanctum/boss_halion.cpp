@@ -147,6 +147,8 @@ public:
             if(!pInstance)
                 return;
             me->SetRespawnDelay(7*DAY);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
             if (me->isAlive()) 
             {
@@ -192,6 +194,8 @@ public:
             if (!pInstance) return;
 
             if (!pWho || pWho->GetTypeId() != TYPEID_PLAYER) return;
+		
+            if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->ToPlayer()->isGameMaster()) return;
 
             if (!intro && pWho->IsWithinDistInMap(me, 80.0f))
                 {
@@ -264,7 +268,7 @@ public:
                 return;
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            DoCast(SPELL_TWILIGHT_PRECISION);
+            DoCast(me, SPELL_TWILIGHT_PRECISION);
             me->SetInCombatWithZone();
             pInstance->SetData(TYPE_HALION, IN_PROGRESS);
             DoScriptText(-1666101,me);
@@ -540,6 +544,8 @@ public:
             if(!pInstance)
                 return;
             me->SetRespawnDelay(7*DAY);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             setStage(0);
             intro = false;
 
@@ -612,7 +618,7 @@ public:
                 intro = true;
                 AttackStart(pWho);
                 setStage(1);
-                DoCast(SPELL_TWILIGHT_PRECISION);
+                DoCast(me, SPELL_TWILIGHT_PRECISION);
                 if (Creature* pReal = me->GetMap()->GetCreature(pInstance->GetData64(NPC_HALION_REAL)))
                     if (pReal->isAlive())
                        me->SetHealth(pReal->GetHealth());
@@ -894,7 +900,7 @@ public:
             {
                 if (!doSearchPlayerAtRange(100.0f))
                 {
-                    sLog->outDebug(LOG_FILTER_TSCR, "ruby_sanctum: cannot detect players in range! ");
+                    //sLog->outDebug("ruby_sanctum: cannot detect players in range! ");
                     if (!m_detectplayers)
                     {
                         pInstance->SetData(TYPE_HALION_EVENT, FAIL);
@@ -941,7 +947,7 @@ public:
                     }
                 }
 
-                sLog->outDebug(LOG_FILTER_TSCR, "ruby_sanctum: Buff num = %u, m_diff = %d ", buffnum, m_diff);
+                //sLog->outDebug("ruby_sanctum: Buff num = %u, m_diff = %d ", buffnum, m_diff);
 
                 pInstance->SetData(TYPE_COUNTER, 50 + (int)Buff[buffnum].diff);
 
@@ -1036,7 +1042,7 @@ public:
                 pInstance->SetData(DATA_ORB_DIRECTION, (uint32)(m_nextdirection*1000));
                 pInstance->SetData(DATA_ORB_N, SPECIAL);
                 pInstance->SetData(DATA_ORB_S, SPECIAL);
-                sLog->outDebug(LOG_FILTER_TSCR, "EventMGR: creature %u send direction %u ",me->GetEntry(),pInstance->GetData(DATA_ORB_DIRECTION));
+                //sLog->outDebug("EventMGR: creature %u send direction %u ",me->GetEntry(),pInstance->GetData(DATA_ORB_DIRECTION));
             }
 
             if (m_timer - 6000 <= uiDiff && !m_warning)
@@ -1110,7 +1116,7 @@ public:
             nextPoint = 0;
             MovementStarted = false;
             pInstance->SetData(m_flag, DONE);
-            sLog->outDebug(LOG_FILTER_TSCR, "EventMGR: creature %u assume m_flag %u ",me->GetEntry(),m_flag);
+            //sLog->outDebug("EventMGR: creature %u assume m_flag %u ",me->GetEntry(),m_flag);
         }
 
         void AttackStart(Unit *who)

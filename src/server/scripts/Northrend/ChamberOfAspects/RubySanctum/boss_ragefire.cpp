@@ -81,6 +81,8 @@ public:
             if(!pInstance)
                 return;
             me->SetRespawnDelay(7*DAY);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             if (me->isAlive()) pInstance->SetData(TYPE_RAGEFIRE, NOT_STARTED);
 
             m_uiFlameBreathTimer = urand(5*IN_MILLISECONDS,15*IN_MILLISECONDS);
