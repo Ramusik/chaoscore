@@ -564,6 +564,34 @@ public:
     }
 };
 
+class spell_general_vezax_mark_of_the_faceless_drain : public SpellScriptLoader
+{
+    public:
+        spell_general_vezax_mark_of_the_faceless_drain() : SpellScriptLoader("spell_general_vezax_mark_of_the_faceless_drain") { }
+
+        class spell_general_vezax_mark_of_the_faceless_drain_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_general_vezax_mark_of_the_faceless_drain_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove(GetTargetUnit());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_general_vezax_mark_of_the_faceless_drain_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ENEMY_DST);
+            }
+
+            Unit* _target;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_general_vezax_mark_of_the_faceless_drain_SpellScript();
+        }
+};
+
 /*
 UPDATE creature_template SET scriptname = 'boss_general_vezax' WHERE entry = 33271;
 UPDATE creature_template SET scriptname = 'mob_saronit_varpor' WHERE entry = 33488;
@@ -572,8 +600,6 @@ DELETE FROM spell_script_names WHERE spell_id = 62692;
 INSERT INTO spell_script_names VALUE (62692,'spell_general_vezax_aura_of_despair_aura');
 DELETE FROM spell_script_names WHERE spell_id = 63276;
 INSERT INTO spell_script_names VALUE (63276,'spell_general_vezax_mark_of_the_faceless_aura');
--- DELETE FROM spell_script_names WHERE spell_id = 63278;
---- INSERT INTO spell_script_names VALUE (63278,'spell_general_vezax_mark_of_the_faceless_spell');
 */
 
 void AddSC_boss_general_vezax()
@@ -583,4 +609,5 @@ void AddSC_boss_general_vezax()
     new mob_saronit_animus();
     new spell_general_vezax_aura_of_despair_aura();
     new spell_general_vezax_mark_of_the_faceless_aura();
+    new spell_general_vezax_mark_of_the_faceless_drain();
 }

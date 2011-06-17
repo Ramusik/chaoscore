@@ -390,8 +390,246 @@ public:
     };
 };
 
+/*##############################
+# npc_convocadora_carboescala (40417)
+###############################*/
+
+enum ConvocadoraSpells
+{
+    SPELL_AGOSTAR = 75412,
+    SPELL_OLA_LLAMAS = 75413
+};
+
+class npc_convocadora_carboescala : public CreatureScript
+{
+public:
+    npc_convocadora_carboescala() : CreatureScript("npc_convocadora_carboescala") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_convocadora_carboescalaAI(creature);
+    }
+	
+    struct npc_convocadora_carboescalaAI : public ScriptedAI
+    {
+        npc_convocadora_carboescalaAI(Creature* creature) : ScriptedAI(creature) 
+		{
+		}
+        
+        uint32 uiAgostarTimer;
+        uint32 uiOlaTimer;
+        
+
+        void Reset()
+        {
+            uiAgostarTimer = 3000;
+            uiOlaTimer = urand(8*IN_MILLISECONDS,13*IN_MILLISECONDS);     
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (uiAgostarTimer <= uiDiff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
+                {
+                    if (pTarget && pTarget->isAlive())
+                        DoCast(pTarget, SPELL_AGOSTAR);
+                }
+                uiAgostarTimer = 8000;
+            }else uiAgostarTimer -= uiDiff;
+
+            if (uiOlaTimer <= uiDiff)
+            {
+                DoCast(me, SPELL_OLA_LLAMAS);
+                uiOlaTimer = urand(8*IN_MILLISECONDS,13*IN_MILLISECONDS);
+            }else uiOlaTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* pKiller) { }
+    };
+};
+
+/*##############################
+# npc_acometedor_carboescala (40419)
+###############################*/
+
+enum AcometedorSpells
+{
+    SPELL_RAJAR = 15284,
+    SPELL_OLA_CHOQUE = 75417
+};
+
+class npc_acometedor_carboescala : public CreatureScript
+{
+public:
+    npc_acometedor_carboescala() : CreatureScript("npc_acometedor_carboescala") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_acometedor_carboescalaAI(creature);
+    }
+	
+    struct npc_acometedor_carboescalaAI : public ScriptedAI
+    {
+        npc_acometedor_carboescalaAI(Creature* creature) : ScriptedAI(creature) 
+		{
+		}
+        
+        uint32 uiRajarTimer;
+        uint32 uiOlaChoqueTimer;
+        
+
+        void Reset()
+        {
+            uiRajarTimer = 5000;
+            uiOlaChoqueTimer = 9000;     
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (uiRajarTimer <= uiDiff)
+            {
+                DoCast(me->getVictim(), SPELL_RAJAR);
+                uiRajarTimer = 11000;
+            }else uiRajarTimer -= uiDiff;
+
+            if (uiOlaChoqueTimer <= uiDiff)
+            {
+                DoCast(me, SPELL_OLA_CHOQUE);
+                uiOlaChoqueTimer = 17000;
+            }else uiOlaChoqueTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* pKiller) { }
+    };
+};
+
+/*##############################
+# npc_elite_carboescala (40421)
+###############################*/
+
+enum EliteSpells
+{
+    SPELL_MACHACAR_CRANEOS = 15621 
+};
+
+class npc_elite_carboescala : public CreatureScript
+{
+public:
+    npc_elite_carboescala() : CreatureScript("npc_elite_carboescala") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_elite_carboescalaAI(creature);
+    }
+	
+    struct npc_elite_carboescalaAI : public ScriptedAI
+    {
+        npc_elite_carboescalaAI(Creature* creature) : ScriptedAI(creature) 
+		{
+		}
+        
+        uint32 uiMachaqueTimer;
+   
+
+        void Reset()
+        {
+            uiMachaqueTimer = 5000;  
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (uiMachaqueTimer <= uiDiff)
+            {
+                DoCast(me->getVictim(), SPELL_MACHACAR_CRANEOS);
+				uiMachaqueTimer = 12000;
+            }else uiMachaqueTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* pKiller) { }
+    };
+};
+
+/*##############################
+# npc_comandante_carboescala (40423)
+###############################*/
+
+enum ComandanteSpells
+{
+    SPELL_GOLPE_MORTAL = 13737,
+    SPELL_GRITO_CONVOCACION = 75414
+};
+
+class npc_comandante_carboescala : public CreatureScript
+{
+public:
+    npc_comandante_carboescala() : CreatureScript("npc_comandante_carboescala") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_comandante_carboescalaAI(creature);
+    }
+	
+    struct npc_comandante_carboescalaAI : public ScriptedAI
+    {
+        npc_comandante_carboescalaAI(Creature* creature) : ScriptedAI(creature) 
+		{
+		}
+        
+        uint32 uiGolpeTimer;
+        uint32 uiGritoTimer;
+        
+
+        void Reset()
+        {
+            uiGolpeTimer = 9000;
+            uiGritoTimer = 1000;     
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (uiGolpeTimer <= uiDiff)
+            {
+                DoCast(me->getVictim(), SPELL_GOLPE_MORTAL);
+				uiGolpeTimer = 9000;
+            }else uiGolpeTimer -= uiDiff;
+
+            if (uiGritoTimer <= uiDiff)
+            {
+                DoCast(me, SPELL_GRITO_CONVOCACION);
+                uiGritoTimer = 100000;
+            }else uiGritoTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* pKiller) { }
+    };
+};
 
 void AddSC_instance_ruby_sanctum()
 {
     new instance_ruby_sanctum;
+    new npc_convocadora_carboescala;
+    new npc_acometedor_carboescala;
+    new npc_elite_carboescala;
+    new npc_comandante_carboescala;
 }

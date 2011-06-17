@@ -92,6 +92,8 @@ public:
 
             if (me->isAlive()) pInstance->SetData(TYPE_BALTHARUS, NOT_STARTED);
             me->SetRespawnDelay(7*DAY);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
             uiStage = 0;
             pClone = NULL;
@@ -339,6 +341,8 @@ public:
             m_uiSaberLashTimer = urand(10*IN_MILLISECONDS,15*IN_MILLISECONDS);
 
             me->SetRespawnDelay(7*DAY);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         }
 
         void KilledUnit(Unit* pVictim)

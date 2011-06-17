@@ -83,14 +83,17 @@ public:
             if(!pInstance)
                 return;
 
-            m_uiSummonTimer = 45*IN_MILLISECONDS;
+            m_uiSummonTimer = 22*IN_MILLISECONDS;
             m_uiCleaveTimer = urand(10*IN_MILLISECONDS,20*IN_MILLISECONDS);
             m_uiImtimidatingTimer = urand(15*IN_MILLISECONDS,25*IN_MILLISECONDS);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
             if (me->isAlive())
             {
                 pInstance->SetData(TYPE_ZARITHRIAN, NOT_STARTED);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
 
@@ -99,9 +102,10 @@ public:
             if (pInstance->GetData(TYPE_XERESTRASZA) == DONE &&
                  pInstance->GetData(TYPE_BALTHARUS) == DONE &&
                  pInstance->GetData(TYPE_RAGEFIRE) == DONE)
-                 {
-                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                 }
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);    
+                }
         }
 
         void KilledUnit(Unit* pVictim)
@@ -165,7 +169,7 @@ public:
                     DoCast(SPELL_CALL_FLAMECALLER);
 
                 DoScriptText(-1666204,me);
-                m_uiSummonTimer = 45*IN_MILLISECONDS;
+                m_uiSummonTimer = 22*IN_MILLISECONDS;
             } else m_uiSummonTimer -= diff;
 
             if (m_uiCleaveTimer <= diff)

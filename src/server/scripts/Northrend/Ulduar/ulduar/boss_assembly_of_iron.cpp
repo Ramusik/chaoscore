@@ -31,44 +31,45 @@ EndScriptData */
 enum eSpells
 {
     // Any boss
-    SPELL_SUPERCHARGE           = 61920,
-    SPELL_BERSERK               = 47008,   // Hard enrage, don't know the correct ID.
+    SPELL_SUPERCHARGE                   = 61920,
+    SPELL_BERSERK                       = 47008, // Hard enrage, don't know the correct ID.
+    SPELL_CREDIT_MARKER                 = 65195, // spell_dbc
 
     // Steelbreaker
-    SPELL_HIGH_VOLTAGE         = 61890,
-    SPELL_HIGH_VOLTAGE_H       = 63498,
-    SPELL_FUSION_PUNCH         = 61903,
-    SPELL_FUSION_PUNCH_H       = 63493,
-    SPELL_STATIC_DISRUPTION    = 44008,
-    SPELL_STATIC_DISRUPTION_H  = 63494,
-    SPELL_OVERWHELMING_POWER_H = 61888,
-    SPELL_OVERWHELMING_POWER   = 64637,
-    SPELL_ELECTRICAL_CHARGE    = 61902,
+    SPELL_HIGH_VOLTAGE                  = 61890,
+    SPELL_HIGH_VOLTAGE_H                = 63498,
+    SPELL_FUSION_PUNCH                  = 61903,
+    SPELL_FUSION_PUNCH_H                = 63493,
+    SPELL_STATIC_DISRUPTION             = 44008,
+    SPELL_STATIC_DISRUPTION_H           = 63494,
+    SPELL_OVERWHELMING_POWER_H          = 61888,
+    SPELL_OVERWHELMING_POWER            = 64637,
+    SPELL_ELECTRICAL_CHARGE             = 61902,
 
     // Runemaster Molgeim
-    SPELL_SHIELD_OF_RUNES      = 62274,
-    SPELL_SHIELD_OF_RUNES_BUFF = 62277,
-    SPELL_SHIELD_OF_RUNES_H    = 63489,
-    SPELL_SHIELD_OF_RUNES_H_BUFF = 63967,
-    SPELL_SUMMON_RUNE_OF_POWER = 63513,
-    SPELL_RUNE_OF_POWER        = 61974,
-    SPELL_RUNE_OF_DEATH        = 62269,
-    SPELL_RUNE_OF_SUMMONING     = 62273,    // This is the spell that summons the rune
-    SPELL_RUNE_OF_SUMMONING_VIS = 62019,    // Visual
-    SPELL_RUNE_OF_SUMMONING_SUMMON = 62020, // Spell that summons
-    SPELL_LIGHTNING_ELEMENTAL_PASSIVE = 62052,
+    SPELL_SHIELD_OF_RUNES               = 62274,
+    SPELL_SHIELD_OF_RUNES_BUFF          = 62277,
+    SPELL_SHIELD_OF_RUNES_H             = 63489,
+    SPELL_SHIELD_OF_RUNES_H_BUFF        = 63967,
+    SPELL_SUMMON_RUNE_OF_POWER          = 63513,
+    SPELL_RUNE_OF_POWER                 = 61974,
+    SPELL_RUNE_OF_DEATH                 = 62269,
+    SPELL_RUNE_OF_SUMMONING             = 62273, // This is the spell that summons the rune
+    SPELL_RUNE_OF_SUMMONING_VIS         = 62019, // Visual
+    SPELL_RUNE_OF_SUMMONING_SUMMON      = 62020, // Spell that summons
+    SPELL_LIGHTNING_ELEMENTAL_PASSIVE   = 62052,
     SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H = 63492,
 
     // Stormcaller Brundir
-    SPELL_CHAIN_LIGHTNING_N    = 61879,
-    SPELL_CHAIN_LIGHTNING_H    = 63479,
-    SPELL_OVERLOAD             = 61869,
-    SPELL_OVERLOAD_H           = 63481,
-    SPELL_LIGHTNING_WHIRL      = 61915,
-    SPELL_LIGHTNING_WHIRL_H    = 63483,
-    SPELL_LIGHTNING_TENDRILS   = 61887,
-    SPELL_LIGHTNING_TENDRILS_H = 63486,
-    SPELL_STORMSHIELD          = 64187,
+    SPELL_CHAIN_LIGHTNING_N             = 61879,
+    SPELL_CHAIN_LIGHTNING_H             = 63479,
+    SPELL_OVERLOAD                      = 61869,
+    SPELL_OVERLOAD_H                    = 63481,
+    SPELL_LIGHTNING_WHIRL               = 61915,
+    SPELL_LIGHTNING_WHIRL_H             = 63483,
+    SPELL_LIGHTNING_TENDRILS            = 61887,
+    SPELL_LIGHTNING_TENDRILS_H          = 63486,
+    SPELL_STORMSHIELD                   = 64187
 };
 
 enum Events
@@ -206,7 +207,7 @@ public:
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_steelbreakerAI (pCreature);
+        return new boss_steelbreakerAI(pCreature);
     }
 
     struct boss_steelbreakerAI : public ScriptedAI
@@ -233,7 +234,7 @@ public:
         InstanceScript* pInstance;
         uint32 phase;
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit * who)
         {
             StartEncounter(pInstance, me, who);
             DoScriptText(SAY_STEELBREAKER_AGGRO, me);
@@ -301,11 +302,13 @@ public:
         {
             DoScriptText(RAND(SAY_STEELBREAKER_DEATH_1, SAY_STEELBREAKER_DEATH_2), me);
             if (IsEncounterComplete(pInstance, me) && pInstance)
-                pInstance->SetData(TYPE_ASSEMBLY, DONE);
-            pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
+            {
+                pInstance->SetBossState(TYPE_ASSEMBLY, DONE);
+                pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_CREDIT_MARKER);
+            }
         }
 
-        void KilledUnit(Unit* /*who*/)
+        void KilledUnit(Unit * /*who*/)
         {
             DoScriptText(RAND(SAY_STEELBREAKER_SLAY_1, SAY_STEELBREAKER_SLAY_2), me);
 
@@ -313,7 +316,7 @@ public:
                 DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
         }
 
-        void SpellHit(Unit* /*from*/, const SpellEntry *spell)
+        void SpellHit(Unit * /*from*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_SUPERCHARGE)
                 DoAction(EVENT_UPDATEPHASE);
@@ -400,7 +403,7 @@ public:
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_runemaster_molgeimAI (pCreature);
+        return new boss_runemaster_molgeimAI(pCreature);
     }
 
     struct boss_runemaster_molgeimAI : public ScriptedAI
@@ -414,7 +417,7 @@ public:
         {
             if (pInstance)
             {
-                pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+                pInstance->SetBossState(TYPE_ASSEMBLY, NOT_STARTED);
                 RespawnEncounter(pInstance, me);
             }
 
@@ -496,16 +499,18 @@ public:
         {
             DoScriptText(RAND(SAY_MOLGEIM_DEATH_1, SAY_MOLGEIM_DEATH_2), me);
             if (IsEncounterComplete(pInstance, me) && pInstance)
-                pInstance->SetData(TYPE_ASSEMBLY, DONE);
-             pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
+            {
+                pInstance->SetBossState(TYPE_ASSEMBLY, DONE);
+                pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_CREDIT_MARKER);
+            }
         }
 
-        void KilledUnit(Unit* /*who*/)
+        void KilledUnit(Unit * /*who*/)
         {
             DoScriptText(RAND(SAY_MOLGEIM_SLAY_1, SAY_MOLGEIM_SLAY_2), me);
         }
 
-        void SpellHit(Unit* /*from*/, const SpellEntry *spell)
+        void SpellHit(Unit * /*from*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_SUPERCHARGE)
                 DoAction(EVENT_UPDATEPHASE);
@@ -598,7 +603,7 @@ public:
         mob_lightning_elementalAI(Creature *c) : ScriptedAI(c)
         {
             me->SetInCombatWithZone();
-            me->AddAura( RAID_MODE(SPELL_LIGHTNING_ELEMENTAL_PASSIVE, SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H), me);
+            me->AddAura(RAID_MODE(SPELL_LIGHTNING_ELEMENTAL_PASSIVE, SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H), me);
         }
 
         // Nothing to do here, just let the creature chase players and procflags == 2 on the applied aura will trigger explosion
@@ -653,7 +658,7 @@ public:
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_stormcaller_brundirAI (pCreature);
+        return new boss_stormcaller_brundirAI(pCreature);
     }
 
     struct boss_stormcaller_brundirAI : public ScriptedAI
@@ -667,7 +672,7 @@ public:
         {
             if (pInstance)
             {
-                pInstance->SetData(TYPE_ASSEMBLY, NOT_STARTED);
+                pInstance->SetBossState(TYPE_ASSEMBLY, NOT_STARTED);
                 RespawnEncounter(pInstance, me);
             }
 
@@ -753,16 +758,18 @@ public:
         {
             DoScriptText(RAND(SAY_BRUNDIR_DEATH_1, SAY_BRUNDIR_DEATH_2), me);
             if (IsEncounterComplete(pInstance, me) && pInstance)
-                pInstance->SetData(TYPE_ASSEMBLY, DONE);
-            pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65195);
+            {
+                pInstance->SetBossState(TYPE_ASSEMBLY, DONE);
+                pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_CREDIT_MARKER);
+            }
         }
 
-        void KilledUnit(Unit* /*who*/)
+        void KilledUnit(Unit * /*who*/)
         {
             DoScriptText(RAND(SAY_BRUNDIR_SLAY_1, SAY_BRUNDIR_SLAY_2), me);
         }
 
-        void SpellHit(Unit* /*from*/, const SpellEntry *spell)
+        void SpellHit(Unit * /*from*/, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_SUPERCHARGE)
                 DoAction(EVENT_UPDATEPHASE);

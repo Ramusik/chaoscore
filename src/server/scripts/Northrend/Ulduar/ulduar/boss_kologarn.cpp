@@ -162,7 +162,7 @@ class boss_kologarn : public CreatureScript
                 me->SetReactState(REACT_DEFENSIVE);
             }
 
-            void JustDied(Unit* /*victim*/)
+            void JustDied(Unit * /*victim*/)
             {
                 DoScriptText(SAY_DEATH, me);
                 DoCast(SPELL_KOLOGARN_PACIFY);
@@ -177,7 +177,8 @@ class boss_kologarn : public CreatureScript
 
             void KilledUnit(Unit* /*who*/)
             {
-                DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
+                if (!(rand()%3))
+                    DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
             }
 
             void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
@@ -545,7 +546,7 @@ class spell_ulduar_stone_grip_cast_target : public SpellScriptLoader
 
             void HandleForceCast(SpellEffIndex i)
             {
-                Player* plr = GetHitPlayer();
+                Player * plr = GetHitPlayer();
                 if (!plr)
                     return;
 
