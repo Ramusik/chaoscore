@@ -682,7 +682,7 @@ public:
             StartEncounter(pInstance, me, who);
             DoScriptText(SAY_BRUNDIR_AGGRO, me);
             DoZoneInCombat();
-            events.ScheduleEvent(EVENT_ENRAGE, 200000);
+            events.ScheduleEvent(EVENT_ENRAGE, 900000);
             events.ScheduleEvent(EVENT_PULSE, 5000);
             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(9000, 17000), 1);
             events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 80000), 1);
