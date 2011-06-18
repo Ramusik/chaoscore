@@ -28,6 +28,7 @@
 
 // UPDATE `creature_template` SET `ScriptName`='npc_chillmaw' WHERE `entry`=33687;
 // *Known bug, The NPC doesn't despawns until server restarts
+
 enum Chillmaw
 {
     SPELL_FROST_BREATH  = 65248,
@@ -976,16 +977,17 @@ public:
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
         pPlayer->PlayerTalkClass->ClearMenus();
+        
         switch (uiAction)
         {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->CastSpell(pPlayer,SPELL_CREDIT_VALIS,true);
-            pPlayer->CLOSE_GOSSIP_MENU();
-            break;
-        case GOSSIP_ACTION_INFO_DEF+2:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_VALIS_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-            pPlayer->SEND_GOSSIP_MENU(VALIS_RP_TEXTID, pCreature->GetGUID());
-            break;
+            case GOSSIP_ACTION_INFO_DEF+1:
+                pPlayer->CastSpell(pPlayer,SPELL_CREDIT_VALIS,true);
+                pPlayer->CLOSE_GOSSIP_MENU();
+                break;
+            case GOSSIP_ACTION_INFO_DEF+2:
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_VALIS_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                pPlayer->SEND_GOSSIP_MENU(VALIS_RP_TEXTID, pCreature->GetGUID());
+                break;
         }
         return true;
     }
@@ -1025,12 +1027,13 @@ public:
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
     {
         pPlayer->PlayerTalkClass->ClearMenus();
-        switch(uiAction)
+       
+        switch (uiAction)
         {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->CastSpell(pPlayer, SPELL_TAXI_KERITOSE, true);
-            pPlayer->CLOSE_GOSSIP_MENU();
-            break;
+            case GOSSIP_ACTION_INFO_DEF+1:
+                pPlayer->CastSpell(pPlayer, SPELL_TAXI_KERITOSE, true);
+                pPlayer->CLOSE_GOSSIP_MENU();
+                break;
         }
         return true;
     }
@@ -1075,21 +1078,21 @@ public:
             {
                 switch (cAura->GetStackAmount())
                 {
-                case 1:
-                    me->RemoveAura(SHIELD_LEVEL2);
-                    me->RemoveAura(SHIELD_LEVEL3);
-                    me->CastSpell(me, SHIELD_LEVEL1, true);
-                    break;
-                case 2:
-                    me->RemoveAura(SHIELD_LEVEL1);
-                    me->RemoveAura(SHIELD_LEVEL3);
-                    me->CastSpell(me, SHIELD_LEVEL2, true);
-                    break;
-                case 3:
-                    me->RemoveAura(SHIELD_LEVEL2);
-                    me->RemoveAura(SHIELD_LEVEL1);
-                    me->CastSpell(me, SHIELD_LEVEL3, true);
-                    break;
+                    case 1:
+                        me->RemoveAura(SHIELD_LEVEL2);
+                        me->RemoveAura(SHIELD_LEVEL3);
+                        me->CastSpell(me, SHIELD_LEVEL1, true);
+                        break;
+                    case 2:
+                        me->RemoveAura(SHIELD_LEVEL1);
+                        me->RemoveAura(SHIELD_LEVEL3);
+                        me->CastSpell(me, SHIELD_LEVEL2, true);
+                        break;
+                    case 3:
+                        me->RemoveAura(SHIELD_LEVEL2);
+                        me->RemoveAura(SHIELD_LEVEL1);
+                        me->CastSpell(me, SHIELD_LEVEL3, true);
+                        break;
                 }
             }
         }
@@ -1130,19 +1133,19 @@ public:
                 {
                     switch (cAura->GetStackAmount())
                     {
-                    case 0:
-                    case 1:
-                        me->RemoveAura(DEFEND);
-                        me->RemoveAura(SHIELD_LEVEL2);
-                        me->RemoveAura(SHIELD_LEVEL3);
-                        me->RemoveAura(SHIELD_LEVEL1);
-                        break;
-                    case 2:
-                        cAura->SetStackAmount(1);
-                        break;
-                    case 3:
-                        cAura->SetStackAmount(2);
-                        break;
+                        case 0:
+                        case 1:
+                            me->RemoveAura(DEFEND);
+                            me->RemoveAura(SHIELD_LEVEL2);
+                            me->RemoveAura(SHIELD_LEVEL3);
+                            me->RemoveAura(SHIELD_LEVEL1);
+                            break;
+                        case 2:
+                            cAura->SetStackAmount(1);
+                            break;
+                        case 3:
+                            cAura->SetStackAmount(2);
+                            break;
                     }
                 }
                 Escudo();
@@ -1157,18 +1160,18 @@ public:
                 {
                     switch (pAura->GetStackAmount())
                     {
-                    case 0:
-                        pTarget->RemoveAura(DEFEND);
-                        break;
-                    case 1:
-                        pAura->SetStackAmount(0);
-                        break;
-                    case 2:
-                        pAura->SetStackAmount(1);
-                        break;
-                    case 3:
-                        pAura->SetStackAmount(2);
-                        break;
+                        case 0:
+                            pTarget->RemoveAura(DEFEND);
+                            break;
+                        case 1:
+                            pAura->SetStackAmount(0);
+                            break;
+                        case 2:
+                            pAura->SetStackAmount(1);
+                            break;
+                        case 3:
+                            pAura->SetStackAmount(2);
+                            break;
                     }
                 }
             }
@@ -1187,37 +1190,37 @@ public:
                 {
                     switch (urand(0,7))
                     {
-                    case 0: 
-                    case 1: 
-                    case 2: 
-                        DoCastAOE(SHIELD_BREAKER, true);
-                        break;
-                    case 3: 
-                    case 4:
-                    case 5:
-                    case 6:
-                        DoCastAOE(CHARGE, true);
-                        break;
-                    case 7:
-                        me->CastSpell(me, DEFEND, true);
-                        Escudo();
-                        break;
+                        case 0: 
+                        case 1: 
+                        case 2: 
+                            DoCastAOE(SHIELD_BREAKER, true);
+                            break;
+                        case 3: 
+                        case 4:
+                        case 5:
+                        case 6:
+                            DoCastAOE(CHARGE, true);
+                            break;
+                        case 7:
+                            me->CastSpell(me, DEFEND, true);
+                            Escudo();
+                            break;
                     }
                 }
                 else
                 {
                     switch (urand(0,4))
                     {
-                    case 0: 
-                        me->CastSpell(me, DEFEND, true);
-                        Escudo();
-                        break;
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                        DoCastAOE(THRUST, true);
-                        break;
+                        case 0: 
+                            me->CastSpell(me, DEFEND, true);
+                            Escudo();
+                            break;
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                            DoCastAOE(THRUST, true);
+                            break;
                     }
                 }
                 SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX );
@@ -1229,18 +1232,18 @@ public:
                 y =urand(0,7);
                 switch (urand(0,3))
                 {
-                case 0:
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
-                    break;
-                case 1: 
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
-                    break;
-                case 2: 
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
-                    break;
-                case 3: 
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
-                    break;
+                    case 0:
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
+                        break;
+                    case 1: 
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
+                        break;
+                    case 2: 
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
+                        break;
+                    case 3: 
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
+                        break;
                 }
                 MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
                 } else 
@@ -1454,21 +1457,21 @@ public:
             {
                 switch (cAura->GetStackAmount())
                 {
-                case 1:
-                    me->RemoveAura(SHIELD_LEVEL2);
-                    me->RemoveAura(SHIELD_LEVEL3);
-                    me->CastSpell(me, SHIELD_LEVEL1, true);
-                    break;
-                case 2:
-                    me->RemoveAura(SHIELD_LEVEL1);
-                    me->RemoveAura(SHIELD_LEVEL3);
-                    me->CastSpell(me, SHIELD_LEVEL2, true);
-                    break;
-                case 3:
-                    me->RemoveAura(SHIELD_LEVEL2);
-                    me->RemoveAura(SHIELD_LEVEL1);
-                    me->CastSpell(me, SHIELD_LEVEL3, true);
-                    break;
+                    case 1:
+                        me->RemoveAura(SHIELD_LEVEL2);
+                        me->RemoveAura(SHIELD_LEVEL3);
+                        me->CastSpell(me, SHIELD_LEVEL1, true);
+                        break;
+                    case 2:
+                        me->RemoveAura(SHIELD_LEVEL1);
+                        me->RemoveAura(SHIELD_LEVEL3);
+                        me->CastSpell(me, SHIELD_LEVEL2, true);
+                        break;
+                    case 3:
+                        me->RemoveAura(SHIELD_LEVEL2);
+                        me->RemoveAura(SHIELD_LEVEL1);
+                        me->CastSpell(me, SHIELD_LEVEL3, true);
+                        break;
                 }
             }
         }
@@ -1510,19 +1513,19 @@ public:
                 {
                     switch (cAura->GetStackAmount())
                     {
-                    case 0:
-                    case 1:
-                        me->RemoveAura(DEFEND);
-                        me->RemoveAura(SHIELD_LEVEL2);
-                        me->RemoveAura(SHIELD_LEVEL3);
-                        me->RemoveAura(SHIELD_LEVEL1);
-                        break;
-                    case 2:
-                        cAura->SetStackAmount(1);
-                        break;
-                    case 3:
-                        cAura->SetStackAmount(2);
-                        break;
+                        case 0:
+                        case 1:
+                            me->RemoveAura(DEFEND);
+                            me->RemoveAura(SHIELD_LEVEL2);
+                            me->RemoveAura(SHIELD_LEVEL3);
+                            me->RemoveAura(SHIELD_LEVEL1);
+                            break;
+                        case 2:
+                            cAura->SetStackAmount(1);
+                            break;
+                        case 3:
+                            cAura->SetStackAmount(2);
+                            break;
                     }
                 }
                 Escudo();
@@ -1537,18 +1540,18 @@ public:
                 {
                     switch (pAura->GetStackAmount())
                     {
-                    case 0:
-                        pTarget->RemoveAura(DEFEND);
-                        break;
-                    case 1:
-                        pAura->SetStackAmount(0);
-                        break;
-                    case 2:
-                        pAura->SetStackAmount(1);
-                        break;
-                    case 3:
-                        pAura->SetStackAmount(2);
-                        break;
+                        case 0:
+                            pTarget->RemoveAura(DEFEND);
+                            break;
+                        case 1:
+                            pAura->SetStackAmount(0);
+                            break;
+                        case 2:
+                            pAura->SetStackAmount(1);
+                            break;
+                        case 3:
+                            pAura->SetStackAmount(2);
+                            break;
                     }
                 }
             }
@@ -1567,37 +1570,37 @@ public:
                 {
                     switch (urand(0,7))
                     {
-                    case 0: 
-                    case 1: 
-                    case 2: 
-                        DoCastAOE(SHIELD_BREAKER, true);
-                        break;
-                    case 3: 
-                    case 4:
-                    case 5:
-                    case 6:
-                        DoCastAOE(CHARGE, true);
-                        break;
-                    case 7:
-                        me->CastSpell(me, DEFEND, true);
-                        Escudo();
-                        break;
+                        case 0: 
+                        case 1: 
+                        case 2: 
+                            DoCastAOE(SHIELD_BREAKER, true);
+                            break;
+                        case 3: 
+                        case 4:
+                        case 5:
+                        case 6:
+                            DoCastAOE(CHARGE, true);
+                            break;
+                        case 7:
+                            me->CastSpell(me, DEFEND, true);
+                            Escudo();
+                            break;
                     }
                 }
                 else
                 {
                     switch (urand(0,4))
                     {
-                    case 0: 
-                        me->CastSpell(me, DEFEND, true);
-                        Escudo();
-                        break;
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                        DoCastAOE(THRUST, true);
-                        break;
+                        case 0: 
+                            me->CastSpell(me, DEFEND, true);
+                            Escudo();
+                            break;
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                            DoCastAOE(THRUST, true);
+                            break;
                     }
                 }
                 SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX);
@@ -1610,18 +1613,18 @@ public:
                     y =urand(0,7);
                     switch (urand(0,3))
                     {
-                    case 0:
-                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
-                        break;
-                    case 1: 
-                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
-                        break;
-                    case 2: 
-                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
-                        break;
-                    case 3: 
-                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
-                        break;
+                        case 0:
+                            me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
+                            break;
+                        case 1: 
+                            me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
+                            break;
+                        case 2: 
+                            me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
+                            break;
+                        case 3: 
+                            me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
+                            break;
                     }
                     MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
                 } else 
@@ -1769,21 +1772,21 @@ public:
             {
                 switch (cAura->GetStackAmount())
                 {
-                case 1:
-                    me->RemoveAura(SHIELD_LEVEL2);
-                    me->RemoveAura(SHIELD_LEVEL3);
-                    me->CastSpell(me, SHIELD_LEVEL1, true);
-                    break;
-                case 2:
-                    me->RemoveAura(SHIELD_LEVEL1);
-                    me->RemoveAura(SHIELD_LEVEL3);
-                    me->CastSpell(me, SHIELD_LEVEL2, true);
-                    break;
-                case 3:
-                    me->RemoveAura(SHIELD_LEVEL2);
-                    me->RemoveAura(SHIELD_LEVEL1);
-                    me->CastSpell(me, SHIELD_LEVEL3, true);
-                    break;
+                    case 1:
+                        me->RemoveAura(SHIELD_LEVEL2);
+                        me->RemoveAura(SHIELD_LEVEL3);
+                        me->CastSpell(me, SHIELD_LEVEL1, true);
+                        break;
+                    case 2:
+                        me->RemoveAura(SHIELD_LEVEL1);
+                        me->RemoveAura(SHIELD_LEVEL3);
+                        me->CastSpell(me, SHIELD_LEVEL2, true);
+                        break;
+                    case 3:
+                        me->RemoveAura(SHIELD_LEVEL2);
+                        me->RemoveAura(SHIELD_LEVEL1);
+                        me->CastSpell(me, SHIELD_LEVEL3, true);
+                        break;
                 }
             }
         }
@@ -1842,19 +1845,19 @@ public:
                 {
                     switch (cAura->GetStackAmount())
                     {
-                    case 0:
-                    case 1:
-                        me->RemoveAura(DEFEND);
-                        me->RemoveAura(SHIELD_LEVEL2);
-                        me->RemoveAura(SHIELD_LEVEL3);
-                        me->RemoveAura(SHIELD_LEVEL1);
-                        break;
-                    case 2:
-                        cAura->SetStackAmount(1);
-                        break;
-                    case 3:
-                        cAura->SetStackAmount(2);
-                        break;
+                        case 0:
+                        case 1:
+                            me->RemoveAura(DEFEND);
+                            me->RemoveAura(SHIELD_LEVEL2);
+                            me->RemoveAura(SHIELD_LEVEL3);
+                            me->RemoveAura(SHIELD_LEVEL1);
+                            break;
+                        case 2:
+                            cAura->SetStackAmount(1);
+                            break;
+                        case 3:
+                            cAura->SetStackAmount(2);
+                            break;
                     }
                 }
                 Escudo();
@@ -1869,18 +1872,18 @@ public:
                 {
                     switch (pAura->GetStackAmount())
                     {
-                    case 0:
-                        pTarget->RemoveAura(DEFEND);
-                        break;
-                    case 1:
-                        pAura->SetStackAmount(0);
-                        break;
-                    case 2:
-                        pAura->SetStackAmount(1);
-                        break;
-                    case 3:
-                        pAura->SetStackAmount(2);
-                        break;
+                        case 0:
+                            pTarget->RemoveAura(DEFEND);
+                            break;
+                        case 1:
+                            pAura->SetStackAmount(0);
+                            break;
+                        case 2:
+                            pAura->SetStackAmount(1);
+                            break;
+                        case 3:
+                            pAura->SetStackAmount(2);
+                            break;
                     }
                 }
             }
@@ -1899,37 +1902,37 @@ public:
                 {
                     switch (urand(0,7))
                     {
-                    case 0:
-                    case 1:
-                    case 2:
-                        DoCastAOE(SHIELD_BREAKER, true);
-                        break;
-                    case 3: 
-                    case 4:
-                    case 5:
-                    case 6:
-                        DoCastAOE(CHARGE, true);
-                        break;
-                    case 7:
-                        me->CastSpell(me, DEFEND, true);
-                        Escudo();
-                        break;
+                        case 0:
+                        case 1:
+                        case 2:
+                            DoCastAOE(SHIELD_BREAKER, true);
+                            break;
+                        case 3: 
+                        case 4:
+                        case 5:
+                        case 6:
+                            DoCastAOE(CHARGE, true);
+                            break;
+                        case 7:
+                            me->CastSpell(me, DEFEND, true);
+                            Escudo();
+                            break;
                     }
                 }
                 else
                 {
                     switch (urand(0,4))
                     {
-                    case 0: 
-                        me->CastSpell(me, DEFEND, true);
-                        Escudo();
-                        break;
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                        DoCastAOE(THRUST, true);
-                        break;
+                        case 0: 
+                            me->CastSpell(me, DEFEND, true);
+                            Escudo();
+                            break;
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                            DoCastAOE(THRUST, true);
+                            break;
                     }
                 }
                 SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX );
@@ -1942,18 +1945,18 @@ public:
                 y =urand(0,7);
                 switch (urand(0,3))
                 {
-                case 0:
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
-                    break;
-                case 1: 
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
-                    break;
-                case 2: 
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
-                    break;
-                case 3: 
-                    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
-                    break;
+                    case 0:
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
+                        break;
+                    case 1: 
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()+y), pTarget->GetPositionZ());
+                        break;
+                    case 2: 
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
+                        break;
+                    case 3: 
+                        me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-x), (pTarget->GetPositionY()-y), pTarget->GetPositionZ());
+                        break;
                 }
                 MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
             } else
