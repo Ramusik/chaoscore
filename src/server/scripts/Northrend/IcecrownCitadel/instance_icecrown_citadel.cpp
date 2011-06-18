@@ -699,6 +699,13 @@ class instance_icecrown_citadel : public InstanceMapScript
                         }
                         break;
                     case DATA_GUNSHIP_BATTLE_EVENT:
+                        switch(state)
+                        {
+                            case DONE:
+                                break;
+                            case NOT_STARTED:
+                                break;
+                        }
                         break;
                     case DATA_FESTERGUT:
                         if (state == DONE)
