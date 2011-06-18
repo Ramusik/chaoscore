@@ -218,6 +218,7 @@ public:
                         creature->UpdateEntry(NPC_LORALEN, HORDE);
                     uiKoreln = creature->GetGUID();
                     uiLoralen = creature->GetGUID();
+                    break;
                 case NPC_SYLVANAS_PART1:
                     uiSylvanasPart1 = creature->GetGUID();
                     break;
