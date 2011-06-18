@@ -4555,7 +4555,7 @@ int32 Unit::GetMaxNegativeAuraModifierByMiscMask(AuraType auratype, uint32 misc_
     return modifier;
 }
 
-int32 Unit::GetTotalAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const
+int32 Unit::GetTotalAuraModifierByMiscValue(AuraType auratype, int32 misc_value, SpellEntry const * spell) const
 {
     int32 modifier = 0;
 
@@ -4563,7 +4563,8 @@ int32 Unit::GetTotalAuraModifierByMiscValue(AuraType auratype, int32 misc_value)
     for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
     {
         if ((*i)->GetMiscValue() == misc_value)
-            modifier += (*i)->GetAmount();
+            if (!(spell && spell->SpellFamilyName == SPELLFAMILY_PRIEST && spell->SpellIconID == 548 && (*i)->GetId() == 58943)) // Mind Flay & Da Voodoo Shuffle
+                modifier += (*i)->GetAmount();
     }
     return modifier;
 }
@@ -13090,7 +13091,7 @@ int32 Unit::ModSpellDuration(SpellEntry const* spellProto, Unit const* target, i
             if (!(mechanic & 1<<i))
                 continue;
             // Find total mod value (negative bonus)
-            int32 new_durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, i);
+            int32 new_durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, i, spellProto);
             // Find max mod (negative bonus)
             int32 new_durationMod_not_stack = target->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK, i);
             // Check if mods applied before were weaker
