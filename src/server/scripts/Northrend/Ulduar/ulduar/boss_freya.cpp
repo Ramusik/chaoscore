@@ -307,7 +307,7 @@ public:
                 elementalList.clear();
 
                 WaveCount = 0;
-                uiWave_Timer = 60000;
+                uiWave_Timer = 10000;
                 Ground_Tremor_Timer = 30000;
                 Iron_Roots_Timer = 22000;
                 uiSunbeam_Timer = urand(20000, 30000);
@@ -861,7 +861,7 @@ public:
             if (Creature* freya = me->FindNearestCreature(ENTRY_CREATURE_FREYA, 10000))
                 DoCast(freya, SPELL_ATTUNED_TO_NATURE_REMOVE_2, true);
 
-            me->DespawnOrUnsummon(2000);
+            me->DespawnOrUnsummon(15000);
         }
 
         void UpdateAI(const uint32 diff)
@@ -938,13 +938,13 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(m_pInstance && m_pInstance->GetBossState(TYPE_FREYA) != IN_PROGRESS)
+            if (m_pInstance && m_pInstance->GetBossState(TYPE_FREYA) != IN_PROGRESS)
                 me->DespawnOrUnsummon(2000);
 
             if (!UpdateVictim())
                 return;
 
-            if(Tidal_Wave_Timer <= diff)
+            if (Tidal_Wave_Timer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), RAID_MODE(SPELL_TIDAL_WAVE_10, SPELL_TIDAL_WAVE_25));
                 Tidal_Wave_Timer = 20000;
@@ -1014,14 +1014,14 @@ public:
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), RAID_MODE(SPELL_LIGHTNING_LASH_10, SPELL_LIGHTNING_LASH_25));
                 Lightning_Lash_Timer = 6000;
             }
-            else { Lightning_Lash_Timer -= diff; }
+            else Lightning_Lash_Timer -= diff;
 
             if (Stormbolt_Timer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), RAID_MODE(SPELL_STORMBOLT_10, SPELL_STORMBOLT_25));
                 Stormbolt_Timer = 3000;
             }
-            else { Stormbolt_Timer -= diff; }
+            else Stormbolt_Timer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -1056,12 +1056,12 @@ public:
                 me->AI()->AttackStart(target);
         }
 
-        void EnterCombat(Unit* )
+        void EnterCombat(Unit* /*who*/)
         {
             DoCast(me, RAID_MODE(SPELL_HARDENED_BARK_10, SPELL_HARDENED_BARK_25));
         }
 
-        void JustDied(Unit* )
+        void JustDied(Unit* /*killer*/)
         {
             if (Creature* Freya = me->GetCreature(*me, m_pInstance->GetData64(TYPE_FREYA)))
             {
@@ -1077,7 +1077,7 @@ public:
             me->CombatStart(me->SelectNearestTarget(), true);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const /*diff*/)
         {
             if (m_pInstance && m_pInstance->GetBossState(TYPE_FREYA) != IN_PROGRESS)
                 me->DespawnOrUnsummon(2000);
@@ -1122,7 +1122,7 @@ public:
                 me->AI()->AttackStart(target);
         }
 
-        void EnterCombat(Unit* )
+        void EnterCombat(Unit* /*who*/)
         {
             DoCast(SPELL_CONSERVATORS_GRIP);
 
@@ -1133,20 +1133,20 @@ public:
             }
         }
 
-        void JustDied(Unit* )
+        void JustDied(Unit* /*killer*/)
         {
             if (Creature* freya = me->FindNearestCreature(ENTRY_CREATURE_FREYA, 10000))
                 DoCast(freya, SPELL_ATTUNED_TO_NATURE_REMOVE_25, true);
 
-            me->DespawnOrUnsummon(2000);
+            me->DespawnOrUnsummon(15000);
         }
 
-        void JustSummoned(Unit* )
+        void JustSummoned(Unit* /*summon*/)
         {
             me->CombatStart(me->SelectNearestTarget(), true);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (m_pInstance && m_pInstance->GetBossState(TYPE_FREYA) != IN_PROGRESS)
                 me->DespawnOrUnsummon(2000);
@@ -1263,7 +1263,7 @@ public:
             DoScriptText(SAY_IRONBRANCH_AGGRO, me);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim() || me->HasAura(SPELL_DRAINED_OF_POWER))
                 return;
