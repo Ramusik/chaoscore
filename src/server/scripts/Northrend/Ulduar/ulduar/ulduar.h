@@ -36,7 +36,7 @@ enum UlduarTypes
     TYPE_VEZAX                  = 11,
     TYPE_YOGGSARON              = 12,
     TYPE_ALGALON                = 13,
-    TYPE_COLOSSUS               = 14,
+    TYPE_COLOSSUS               = 14, // unused as encounter
 
     TYPE_SARA,
     TYPE_BRAIN_DOOR_1,

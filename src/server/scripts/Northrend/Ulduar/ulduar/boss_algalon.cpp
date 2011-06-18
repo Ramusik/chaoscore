@@ -224,6 +224,14 @@ public:
             ++step;
         }
 
+        void DoAction(int32 const action)
+        {
+            // used for despawn
+            // should do some roleplay
+            _JustDied();
+            me->DisappearAndDie();
+        }
+
         void JustSummoned(Creature* summon)
         {
             summons.Summon(summon);
@@ -629,7 +637,9 @@ public:
     {
         InstanceScript* _instance = go->GetInstanceScript();
 
-        if (player->HasItemCount(45796, 1) || player->HasItemCount(45798, 1))
+        uint32 item = uint32(go->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? 45796 : 45798);
+
+        if (player->HasItemCount(item, 1))
         {
             _instance->SetBossState(TYPE_ALGALON, SPECIAL);
             go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);

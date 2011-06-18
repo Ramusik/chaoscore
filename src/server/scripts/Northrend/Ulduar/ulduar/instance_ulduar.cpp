@@ -43,7 +43,6 @@ public:
         uint64 uiLeviathanGUID;
         uint64 uiLeviathanGateGUID;
         std::list<uint64> uiLeviathanDoorGUIDList;
-        uint64 XTToyPileGUIDs[4];
 
         // Ignis
         uint64 uiIgnisGUID;
@@ -57,6 +56,7 @@ public:
         // XT-002
         uint64 uiXT002GUID;
         uint64 uiXT002DoorGUID;
+        uint64 XTToyPileGUIDs[4];
 
         // Assembly of Iron
         uint64 uiAssemblyGUIDs[3];
@@ -91,7 +91,6 @@ public:
         uint64 uiAerialUnitGUID;
         uint64 uiMagneticCoreGUID;
         uint64 uiMimironElevatorGUID;
-        uint64 uiBigRedButtonGUID;
         std::list<uint64> uiMimironDoorGUIDList;
 
         // Thorim
@@ -133,7 +132,7 @@ public:
         uint64 uiAlgalonDoor2GUID;
         uint64 uiAlgalonAccessGUID;
 
-
+        uint32 ColossusData;
         uint32 uiSupportKeeperFlag;
         uint32 uiPlayerDeathFlag;
         uint32 uiAlgalonKillCount;
@@ -200,6 +199,7 @@ public:
             uiYoggSaronBrainDoor1GUID = 0;
             uiYoggSaronBrainDoor2GUID = 0;
             uiYoggSaronBrainDoor3GUID = 0;
+            ColossusData              = 0;
             HodirRareCacheData        = 0;
             uiSupportKeeperFlag       = 0;
             uiPlayerDeathFlag         = 0;
@@ -421,11 +421,18 @@ public:
                 case NPC_MIMIRON:
                     uiMimironGUID = creature->GetGUID();
                     break;
-                case NPC_LEVIATHAN_MKII: uiLeviathanMKIIGUID = creature->GetGUID(); break;
-                case NPC_VX_001: uiVX001GUID = creature->GetGUID(); break;
-                case NPC_AERIAL_COMMAND_UNIT: uiAerialUnitGUID = creature->GetGUID(); break;
-                case NPC_MAGNETIC_CORE: uiMagneticCoreGUID = creature->GetGUID(); break;
-
+                case NPC_LEVIATHAN_MKII:
+                    uiLeviathanMKIIGUID = creature->GetGUID();
+                    break;
+                case NPC_VX_001:
+                    uiVX001GUID = creature->GetGUID();
+                    break;
+                case NPC_AERIAL_COMMAND_UNIT:
+                    uiAerialUnitGUID = creature->GetGUID();
+                    break;
+                case NPC_MAGNETIC_CORE:
+                    uiMagneticCoreGUID = creature->GetGUID();
+                    break;
                 case NPC_HODIR:
                     uiHodirGUID = creature->GetGUID();
                     break;
@@ -473,7 +480,10 @@ public:
                 case NPC_ALGALON:
                     uiAlgalonGUID = creature->GetGUID();
                     if (uiAlgalonCountdown < 62)
+                    {
                         creature->setFaction(7);
+                        creature->setActive(true);
+                    }
                     else
                         creature->SetVisible(false);
                     break;
@@ -570,12 +580,8 @@ public:
                     go->setActive(true);
                     uiMimironDoorGUIDList.push_back(go->GetGUID());
                     break;
-				case GO_BIG_RED_BUTTON:
-					uiBigRedButtonGUID = go->GetGUID();
-				    break;
                 case GO_WAY_TO_YOGG:
                     uiWayToYoggGUID = go->GetGUID();
-
                     if (GetBossState(TYPE_FREYA) == DONE &&
                         GetBossState(TYPE_MIMIRON) == DONE &&
                         GetBossState(TYPE_HODIR) == DONE &&
@@ -699,6 +705,7 @@ public:
 
             if (uiEncounter[type] != DONE)
                 uiEncounter[type] = state;
+
             if (state == DONE)
                 SaveToDB();
 
@@ -785,6 +792,7 @@ public:
                             if (Creature* algalon = instance->GetCreature(uiAlgalonGUID))
                             {
                                 algalon->setFaction(7);
+                                algalon->setActive(true);
                                 algalon->SetVisible(true);
                             }
                             HandleGameObject(uiAlgalonDoor1GUID, true);
@@ -812,8 +820,9 @@ public:
                             HandleGameObject(uiAlgalonBridgeDoorGUID, false);
                             break;
                         case DONE:
-                            //uiAlgalonCountdown = 1;
-                            //uiCountdownTimer = 0;
+                            uiAlgalonCountdown = 0;
+                            DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 0);
+                            SaveToDB();
                             HandleGameObject(uiAlgalonGlobeGUID, false);
                             HandleGameObject(uiAlgalonBridgeGUID, false);
                             HandleGameObject(uiAlgalonBridgeVisualGUID, false);
@@ -845,7 +854,7 @@ public:
             switch (type)
             {
                 case TYPE_COLOSSUS:
-                    uiEncounter[TYPE_COLOSSUS] = data;
+                    ColossusData = data;
                     if (data == 2)
                     {
                         if (Creature* pBoss = instance->GetCreature(uiLeviathanGUID))
@@ -964,7 +973,7 @@ public:
             switch (type)
             {
                 case TYPE_COLOSSUS:
-                    return uiEncounter[type];
+                    return ColossusData;
                 case DATA_KEEPER_SUPPORT_YOGG:
                     return uiSupportKeeperFlag;
                 case DATA_HODIR_RARE_CHEST:
@@ -1009,14 +1018,14 @@ public:
                     if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                         tmpState = NOT_STARTED;
 
-                    if (i == TYPE_COLOSSUS)
-                        SetData(i, tmpState);
-                    else
-                        SetBossState(i, EncounterState(tmpState));
+                    SetBossState(i, EncounterState(tmpState));
+
+                    // needed because of custom GetBossState(uint32 type) ?
+                    uiEncounter[i] = tmpState;
                 }
                 uint32 tmpState, tmpState2, tmpState3;
                 loadStream >> tmpState >> tmpState2 >> tmpState3;
-                uiEncounter[TYPE_COLOSSUS] = tmpState;
+                ColossusData = tmpState;
                 uiPlayerDeathFlag = tmpState2;
                 uiAlgalonCountdown = tmpState3;
             }
@@ -1039,7 +1048,8 @@ public:
                     }
                     else
                     {
-                        DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 0);
+                        if (Creature* algalon = instance->GetCreature(uiAlgalonGUID))
+                            algalon->AI()->DoAction(1);
                     }
                     SaveToDB();
                     uiCountdownTimer += 1*MINUTE*IN_MILLISECONDS;

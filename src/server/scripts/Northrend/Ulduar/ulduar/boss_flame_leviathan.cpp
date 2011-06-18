@@ -72,7 +72,8 @@ enum Spells
     SPELL_DUST_CLOUD_IMPACT                     = 54740,
     AURA_STEALTH_DETECTION                      = 18950,
     SPELL_RIDE_VEHICLE                          = 46598,
-    SPELL_ANTI_AIR_ROCKET_DMG                   = 62363
+    SPELL_ANTI_AIR_ROCKET_DMG                   = 62363,
+    SPELL_GROUND_SLAM                           = 62625
 };
 
 enum Creatures
@@ -89,7 +90,7 @@ enum Creatures
     NPC_MIMIRON_TARGET_BEACON                   = 33369,
     NPC_HODIR_TARGET_BEACON                     = 33108,
     NPC_FREYA_TARGET_BEACON                     = 33366,
-    NPC_LOREKEEPER                              = 33686, //Hard mode starter
+    NPC_LOREKEEPER                              = 33686, // Hard mode starter
     NPC_BRANZ_BRONZBEARD                        = 33579,
     NPC_DELORAH                                 = 33701,
     NPC_ULDUAR_GAUNTLET_GENERATOR               = 33571, // Trigger tied to towers
@@ -339,6 +340,12 @@ class boss_flame_leviathan : public CreatureScript
                 _JustDied();
                 DoScriptText(SAY_DEATH, me);
 
+                // DEBUG
+                bool isAllowed = me->IsDamageEnoughForLootingAndReward();
+                char fText[128];
+                sprintf(fText, "DEBUG >> %u LootRecipient: %s", isAllowed, me->GetLootRecipient() ? me->GetLootRecipient()->GetName() : "not found");
+                me->MonsterYell(fText, LANG_UNIVERSAL, 0);
+
                 if (ActiveTowers)
                 {
                     switch (ActiveTowersCount)
@@ -520,7 +527,7 @@ class boss_flame_leviathan : public CreatureScript
                 EnterEvadeIfOutOfCombatArea(diff);
             }
 
-            void StartFreyaEvent()//summon these 4 on each corner wich wil spawn additional hostile mobs
+            void StartFreyaEvent() // summon these 4 on each corner wich wil spawn additional hostile mobs
             {
                 me->SummonCreature(NPC_FREYA_BEACON, 377.02f, -119.10f, 409.81f);
                 me->SummonCreature(NPC_FREYA_BEACON, 377.02f, 54.78f, 409.81f);
@@ -917,7 +924,10 @@ class npc_colossus : public CreatureScript
                 instance = creature->GetInstanceScript();
             }
 
-            InstanceScript *instance;
+            void Reset()
+            {
+                GroundSlamTimer = urand(8000, 10000);
+            }
 
             void JustDied(Unit* /*Who*/)
             {
@@ -930,8 +940,19 @@ class npc_colossus : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
+                if (GroundSlamTimer <= diff)
+                {
+                    DoCastVictim(SPELL_GROUND_SLAM);
+                    GroundSlamTimer = urand(20000, 25000);
+                }
+                else GroundSlamTimer -= diff;
+
                 DoMeleeAttackIfReady();
             }
+
+        private:
+            uint32 GroundSlamTimer;
+            InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
