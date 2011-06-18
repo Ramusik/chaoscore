@@ -935,7 +935,7 @@ class npc_colossus : public CreatureScript
                     instance->SetData(TYPE_COLOSSUS, instance->GetData(TYPE_COLOSSUS)+1);
             }
 
-            void UpdateAI(uint32 const /*diff*/)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;

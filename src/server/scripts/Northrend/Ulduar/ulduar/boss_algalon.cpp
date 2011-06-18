@@ -250,6 +250,7 @@ public:
                         summon->AI()->AttackStart(target);
                     break;
                 case CREATURE_UNLEASHED_DARK_MATTER:
+                    summon->SetInCombatWithZone();
                     if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0))
                         summon->AI()->AttackStart(target);
                     break;
@@ -292,8 +293,6 @@ public:
                         break;
                     case 5:
                         target->CastSpell(target, SPELL_PHASE_PUNCH_PHASE, true);
-                        target->CombatStop();
-                        target->getHostileRefManager().deleteReferences();
                         break;
                     default:
                         break;
@@ -616,15 +615,6 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetInCombatWithZone();
         }
-
-        void SpellHitTarget(Unit* target, const SpellEntry* spell)
-        {
-            if (spell->Id == SPELL_BLACK_HOLE_PHASE)
-            {
-                target->CombatStop();
-                target->getHostileRefManager().deleteReferences();
-            }
-        }
     };
 };
 
@@ -846,6 +836,38 @@ class spell_remove_player_from_phase : public SpellScriptLoader
         }
 };
 
+// reset threat after apply and remove
+class spell_algalon_phased : public SpellScriptLoader
+{
+    public:
+        spell_algalon_phased() : SpellScriptLoader("spell_algalon_phased") { }
+
+        class spell_algalon_phased_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_algalon_phased_AuraScript);
+
+            void OnApplyOrRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    target->CombatStop();
+                    target->getHostileRefManager().deleteReferences();
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectApply += AuraEffectApplyFn(spell_algalon_phased_AuraScript::OnApplyOrRemove, EFFECT_0, SPELL_AURA_PHASE, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_algalon_phased_AuraScript::OnApplyOrRemove, EFFECT_0, SPELL_AURA_PHASE, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_algalon_phased_AuraScript();
+        }
+};
+
 void AddSC_boss_algalon()
 {
     new boss_algalon();
@@ -859,4 +881,5 @@ void AddSC_boss_algalon()
     new spell_cosmic_smash_dmg();
     new spell_cosmic_smash_missile_target();
     new spell_remove_player_from_phase();
+    new spell_algalon_phased();
 }
