@@ -28,7 +28,6 @@
 
 // UPDATE `creature_template` SET `ScriptName`='npc_chillmaw' WHERE `entry`=33687;
 // *Known bug, The NPC doesn't despawns until server restarts
-
 enum Chillmaw
 {
     SPELL_FROST_BREATH  = 65248,
@@ -2468,6 +2467,54 @@ public:
     }
 };
 
+class spell_tournament_shield : public SpellScriptLoader
+{
+public:
+    spell_tournament_shield() : SpellScriptLoader("spell_tournament_shield") { }
+
+    class spell_tournament_shield_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tournament_shield_SpellScript);
+
+        void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* pTarget = GetHitUnit())
+            {
+                if (Unit *caster = GetCaster())
+                {
+                    caster->CastSpell(pTarget,62626,true );
+
+                    if (pTarget->GetTypeId() == TYPEID_UNIT && pTarget->ToCreature()->GetEntry() == 33243)
+                    {
+                        // Kill Credit
+                        if (Unit *player = caster->GetCharmerOrOwner())
+                            player->CastSpell(player,62673,true);
+                    }
+                }
+
+                if (pTarget->GetAura(64100))
+                    pTarget->RemoveAuraFromStack(64100);
+                else 
+                    if (pTarget->GetAura(62552))
+                        pTarget->RemoveAuraFromStack(62552);
+                    else 
+                        if (pTarget->GetAura(62719))
+                            pTarget->RemoveAuraFromStack(62719);
+            }
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_tournament_shield_SpellScript::HandleEffectScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_tournament_shield_SpellScript();
+    }
+};
+
 class spell_tournament_melee : public SpellScriptLoader
 {
 public:
@@ -2542,6 +2589,7 @@ void AddSC_Argen_Tournament()
 {
     new npc_chillmaw;
     new spell_tournament_charge;
+    new spell_tournament_shield;
     new spell_tournament_melee;
     new spell_tournament_duel;
     new npc_dame_evniki_kapsalis;
