@@ -62,7 +62,7 @@ enum DataTypes
     // Encounter States/Boss GUIDs
     DATA_LORD_MARROWGAR             = 0,
     DATA_LADY_DEATHWHISPER          = 1,
-    DATA_GUNSHIP_EVENT              = 2,
+    DATA_GUNSHIP_BATTLE_EVENT       = 2,
     DATA_DEATHBRINGER_SAURFANG      = 3,
     DATA_FESTERGUT                  = 4,
     DATA_ROTFACE                    = 5,
@@ -75,6 +75,7 @@ enum DataTypes
     DATA_THE_LICH_KING              = 12,
 
     // Additional data
+    DATA_GUNSHIP_EVENT                = 52,
     DATA_SAURFANG_EVENT_NPC         = 13,
     DATA_BONED_ACHIEVEMENT          = 14,
     DATA_OOZE_DANCE_ACHIEVEMENT     = 15,

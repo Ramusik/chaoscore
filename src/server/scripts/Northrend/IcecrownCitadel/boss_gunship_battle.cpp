@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -295,8 +295,8 @@ public:
     
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)        
     {                        
-        if ( pCreature->GetInstanceScript()->GetBossState(DATA_GUNSHIP_EVENT) == NOT_STARTED ||                                 
-            pCreature->GetInstanceScript()->GetBossState(DATA_GUNSHIP_EVENT) == DONE)                
+        if ( pCreature->GetInstanceScript()->GetBossState(DATA_GUNSHIP_BATTLE_EVENT) == NOT_STARTED ||                                 
+            pCreature->GetInstanceScript()->GetBossState(DATA_GUNSHIP_BATTLE_EVENT) == DONE)                
             return false;                        
         pPlayer->ADD_GOSSIP_ITEM(49278, "Dame una de estas maquinas", 1000, ZAFOD_BOOMBOX_GOSSIP_GET);
         pPlayer->ADD_GOSSIP_ITEM(0, "Tal vez, mas tarde", 1001, ZAFOD_BOOMBOX_GOSSIP_CANCEL);
@@ -336,9 +336,9 @@ public:
     
     struct boss_muradin_bronzebardAI : public BossAI                
     {                        
-        boss_muradin_bronzebardAI(Creature* pCreature) : BossAI(pCreature, DATA_GUNSHIP_EVENT)
+        boss_muradin_bronzebardAI(Creature* pCreature) : BossAI(pCreature, DATA_GUNSHIP_BATTLE_EVENT)
         {                                
-            instance->SetBossState(DATA_GUNSHIP_EVENT, NOT_STARTED);
+            instance->SetBossState(DATA_GUNSHIP_BATTLE_EVENT, NOT_STARTED);
             instance->SetData(DATA_GUNSHIP_EVENT, PHASE_NOT_STARTED);
             bDialog = false;                                
             dialogID = 0;
@@ -520,7 +520,7 @@ public:
                         case DO_ACTION_START_GUNSHIP_BATTLE:
                             health_theSkybreaker = RAID_MODE( 600000, 1200000);
                             health_ogrimsHammer = RAID_MODE( 600000, 1200000);
-                            instance->SetBossState( DATA_GUNSHIP_EVENT, NOT_STARTED);
+                            instance->SetBossState( DATA_GUNSHIP_BATTLE_EVENT, NOT_STARTED);
                             instance->SetData( DATA_GUNSHIP_EVENT, PHASE_NOT_STARTED);
                             bDialog = true;                                                
                             dialogID = 0;
@@ -561,14 +561,14 @@ public:
                     if ( pPlayer->GetTeamId() == TEAM_HORDE)        
                         return false;         
                     InstanceScript* pInstance = pCreature->GetInstanceScript();
-                    if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_EVENT) == NOT_STARTED)
+                    if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_BATTLE_EVENT) == NOT_STARTED)
                     {                               
                         pPlayer->ADD_GOSSIP_ITEM(0, "Mis aliados estan en buen estado, Muradin, Adelante", 10875, ALLIANCE_GOSSIP_ACTION_START);
                         pPlayer->ADD_GOSSIP_ITEM(0, "Volveremos mas adelante", 631, ALLIANCE_GOSSIP_ACTION_CANCEL);
                         pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
                         return true;                        
                     }            
-                    if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_EVENT) == DONE)
+                    if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_BATTLE_EVENT) == DONE)
                     {                               
                         pPlayer->ADD_GOSSIP_ITEM(0, "Vamos a la parte superior del Libramorte", 10876, ALLIANCE_GOSSIP_ACTION_TP); 
                         pPlayer->ADD_GOSSIP_ITEM(0, "Volveremos mas adelante", 631, ALLIANCE_GOSSIP_ACTION_CANCEL);  
@@ -607,9 +607,9 @@ public:
     
     struct boss_high_overlord_varok_saurfangAI : public BossAI                
     {                        
-        boss_high_overlord_varok_saurfangAI(Creature* pCreature) : BossAI(pCreature, DATA_GUNSHIP_EVENT)
+        boss_high_overlord_varok_saurfangAI(Creature* pCreature) : BossAI(pCreature, DATA_GUNSHIP_BATTLE_EVENT)
         {                               
-            instance->SetBossState( DATA_GUNSHIP_EVENT, NOT_STARTED);
+            instance->SetBossState( DATA_GUNSHIP_BATTLE_EVENT, NOT_STARTED);
             instance->SetData( DATA_GUNSHIP_EVENT, PHASE_NOT_STARTED);
             bDialog = false;
             dialogID = 0; 
@@ -771,7 +771,7 @@ public:
                     case DO_ACTION_START_GUNSHIP_BATTLE: 
                         health_theSkybreaker = RAID_MODE( 600000, 1200000);
                         health_ogrimsHammer = RAID_MODE( 600000, 1200000);    
-                        instance->SetBossState( DATA_GUNSHIP_EVENT, NOT_STARTED); 
+                        instance->SetBossState( DATA_GUNSHIP_BATTLE_EVENT, NOT_STARTED); 
                         instance->SetData( DATA_GUNSHIP_EVENT, PHASE_NOT_STARTED);
                         bDialog = true;                
                         dialogID = 0;       
@@ -811,14 +811,14 @@ public:
                 if ( pPlayer->GetTeamId() == TEAM_ALLIANCE)     
                     return false;         
                 InstanceScript* pInstance = pCreature->GetInstanceScript();  
-                if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_EVENT) == NOT_STARTED)  
+                if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_BATTLE_EVENT) == NOT_STARTED)  
                 {             
                     pPlayer->ADD_GOSSIP_ITEM(0, "Listos para la batalla", 631, HORDE_GOSSIP_ACTION_START); 
                     pPlayer->ADD_GOSSIP_ITEM(0, "Volveremos más adelante", 631, HORDE_GOSSIP_ACTION_CANCEL);
                     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());  
                     return true;                       
                 }          
-                if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_EVENT) == DONE)
+                if (pInstance && pInstance->GetBossState(DATA_GUNSHIP_BATTLE_EVENT) == DONE)
                 {           
                     pPlayer->ADD_GOSSIP_ITEM(0, "Vamos a la parte superior del Libramorte", 631, HORDE_GOSSIP_ACTION_TP); 
                     pPlayer->ADD_GOSSIP_ITEM(0, "Volveremos más adelante", 631, HORDE_GOSSIP_ACTION_CANCEL);
