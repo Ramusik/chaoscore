@@ -434,7 +434,7 @@ namespace Pathfinding
         }
 
         char fileName[25];
-        sprintf(fileName, "mmaps/%03u.mmap", mapID);
+        sprintf(fileName, "mmaps/%03u.map", mapID);
 
         FILE* file = fopen(fileName, "wb");
         if (!file)
@@ -779,7 +779,7 @@ namespace Pathfinding
 
             // file output
             char fileName[255];
-            sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
+            sprintf(fileName, "mmaps/%03u%02i%02i.terrain", mapID, tileY, tileX);
             FILE* file = fopen(fileName, "wb");
             if (!file)
             {
@@ -793,10 +793,10 @@ namespace Pathfinding
             printf("%s Writing to file...                      \r", tileString);
 
             // write header
-            MmapTileHeader header;
+            mapTileHeader header;
             header.usesLiquids = m_terrainBuilder->usesLiquids();
             header.size = uint32(navDataSize);
-            fwrite(&header, sizeof(MmapTileHeader), 1, file);
+            fwrite(&header, sizeof(mapTileHeader), 1, file);
 
             // write data
             fwrite(navData, sizeof(unsigned char), navDataSize, file);
@@ -934,19 +934,19 @@ namespace Pathfinding
     bool MapBuilder::shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY)
     {
         char fileName[255];
-        sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
+        sprintf(fileName, "mmaps/%03u%02i%02i.terrain", mapID, tileY, tileX);
         FILE* file = fopen(fileName, "rb");
         if (!file)
             return false;
 
-        MmapTileHeader header;
-        fread(&header, sizeof(MmapTileHeader), 1, file);
+        mapTileHeader header;
+        fread(&header, sizeof(mapTileHeader), 1, file);
         fclose(file);
 
-        if (header.mmapMagic != MMAP_MAGIC || header.dtVersion != DT_NAVMESH_VERSION)
+        if (header.mapMagic != MMAP_MAGIC || header.dtVersion != DT_NAVMESH_VERSION)
             return false;
 
-        if (header.mmapVersion != MMAP_VERSION)
+        if (header.mapVersion != MMAP_VERSION)
             return false;
 
         return true;

@@ -3091,16 +3091,16 @@ enum RemoveMethod
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
 #define MMAP_VERSION 3
 
-struct MmapTileHeader
+struct mapTileHeader
 {
-    uint32 mmapMagic;
+    uint32 mapMagic;
     uint32 dtVersion;
-    uint32 mmapVersion;
+    uint32 mapVersion;
     uint32 size;
     bool usesLiquids : 1;
 
-    MmapTileHeader() : mmapMagic(MMAP_MAGIC), dtVersion(DT_NAVMESH_VERSION),
-                       mmapVersion(MMAP_VERSION), size(0), usesLiquids(true) {}
+    mapTileHeader() : mapMagic(MMAP_MAGIC), dtVersion(DT_NAVMESH_VERSION),
+                       mapVersion(MMAP_VERSION), size(0), usesLiquids(true) {}
 };
 
 enum NavTerrain

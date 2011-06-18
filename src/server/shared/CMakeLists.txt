@@ -55,7 +55,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/dep/SFMT
   ${CMAKE_SOURCE_DIR}/dep/mersennetwister
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
-  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Recast
   ${CMAKE_SOURCE_DIR}/dep/sockets/include
   ${CMAKE_SOURCE_DIR}/dep/utf8cpp
   ${CMAKE_SOURCE_DIR}/src/server
@@ -80,6 +79,7 @@ add_library(shared STATIC ${shared_STAT_SRCS})
 
 target_link_libraries(shared
   ${ACE_LIBRARY}
+  Detour
 )
 
 # Generate precompiled header

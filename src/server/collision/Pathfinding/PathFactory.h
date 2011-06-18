@@ -24,12 +24,12 @@
 namespace MMAP
 {
     // static class
-    // holds all mmap global data
-    // access point to MMapManager singelton
+    // holds all map global data
+    // access point to PathManager singelton
     class MMapFactory
     {
         public:
-            static MMapManager* createOrGetMMapManager();
+            static PathManager* createOrGetMMapManager();
             static void clear();
             static void preventPathfindingOnMaps(const char* ignoreMapIds);
             static bool IsPathfindingEnabled(uint32 mapId);

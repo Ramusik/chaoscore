@@ -25,14 +25,14 @@
 //  move map related classes
 namespace MMAP
 {
-    typedef UNORDERED_MAP<uint32, dtTileRef> MMapTileSet;
+    typedef UNORDERED_MAP<uint32, dtTileRef> MapTileSet;
     typedef UNORDERED_MAP<uint32, dtNavMeshQuery*> NavMeshQuerySet;
 
-    // dummy struct to hold map's mmap data
-    struct MMapData
+    // dummy struct to hold maps data
+    struct MapData
     {
-        MMapData(dtNavMesh* mesh) : navMesh(mesh) {}
-        ~MMapData()
+        MapData(dtNavMesh* mesh) : navMesh(mesh) {}
+        ~MapData()
         {
             for (NavMeshQuerySet::iterator i = navMeshQueries.begin(); i != navMeshQueries.end(); ++i)
                 dtFreeNavMeshQuery(i->second);
@@ -45,18 +45,18 @@ namespace MMAP
 
         // we have to use single dtNavMeshQuery for every instance, since those are not thread safe
         NavMeshQuerySet navMeshQueries;     // instanceId to query
-        MMapTileSet mmapLoadedTiles;        // maps [map grid coords] to [dtTile]
+        MapTileSet mapLoadedTiles;        // maps [map grid coords] to [dtTile]
     };
 
-    typedef UNORDERED_MAP<uint32, MMapData*> MMapDataSet;
+    typedef UNORDERED_MAP<uint32, MapData*> MapDataSet;
 
     // singelton class
     // holds all all access to mmap loading unloading and meshes
-    class MMapManager
+    class PathManager
     {
         public:
-            MMapManager() : loadedTiles(0) {}
-            ~MMapManager();
+            PathManager() : loadedTiles(0) {}
+            ~PathManager();
 
             bool loadMap(uint32 mapId, int32 x, int32 y);
             bool unloadMap(uint32 mapId, int32 x, int32 y);
@@ -68,12 +68,12 @@ namespace MMAP
             dtNavMesh const* GetNavMesh(uint32 mapId);
 
             uint32 getLoadedTilesCount() const { return loadedTiles; }
-            uint32 getLoadedMapsCount() const { return loadedMMaps.size(); }
+            uint32 getLoadedMapsCount() const { return loadedMaps.size(); }
         private:
             bool loadMapData(uint32 mapId);
             uint32 packTileID(int32 x, int32 y);
 
-            MMapDataSet loadedMMaps;
+            MapDataSet loadedMaps;
             uint32 loadedTiles;
     };
 }

@@ -194,7 +194,7 @@ class pathfinding_commandscript : public CommandScript
             handler->PSendSysMessage("mmap stats:");
             handler->PSendSysMessage("global mmap pathfinding is %sabled", sWorld->getBoolConfig(CONFIG_ENABLE_PATHFINDING) ? "en" : "dis");
 
-            MMAP::MMapManager *manager = MMAP::MMapFactory::createOrGetMMapManager();
+            MMAP::PathManager *manager = MMAP::MMapFactory::createOrGetMMapManager();
             handler->PSendSysMessage(" %u maps loaded with %u tiles overall", manager->getLoadedMapsCount(), manager->getLoadedTilesCount());
 
             const dtNavMesh* navmesh = manager->GetNavMesh(handler->GetSession()->GetPlayer()->GetMapId());

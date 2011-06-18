@@ -25,15 +25,15 @@ namespace MMAP
 {
     // ######################## MMapFactory ########################
     // our global singelton copy
-    MMapManager *g_MMapManager = NULL;
+    PathManager *g_MMapManager = NULL;
 
     // stores list of mapids which do not use pathfinding
     std::set<uint32>* g_mmapDisabledIds = NULL;
 
-    MMapManager* MMapFactory::createOrGetMMapManager()
+    PathManager* MMapFactory::createOrGetMMapManager()
     {
         if (g_MMapManager == NULL)
-            g_MMapManager = new MMapManager();
+            g_MMapManager = new PathManager();
 
         return g_MMapManager;
     }

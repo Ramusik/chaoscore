@@ -76,7 +76,6 @@
 #include "SmartAI.h"
 #include "Channel.h"
 #include "AuctionHouseBot.h"
-#include "MemoryManagement.h"
 #include "PathFactory.h"
 #include "AnticheatMgr.h"
 
