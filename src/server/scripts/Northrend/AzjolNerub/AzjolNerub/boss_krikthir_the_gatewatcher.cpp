@@ -156,9 +156,10 @@ public:
 
             if (uiCurseFatigueTimer <= diff)
             {
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
-
-                DoCast(pTarget, SPELL_CURSE_OF_FATIGUE);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    DoCast(target, SPELL_CURSE_OF_FATIGUE);
+                if (Unit* tankTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true))
+                    DoCast(tankTarget, SPELL_CURSE_OF_FATIGUE);
 
                 uiCurseFatigueTimer = 20*IN_MILLISECONDS;
             } else uiCurseFatigueTimer -= diff;

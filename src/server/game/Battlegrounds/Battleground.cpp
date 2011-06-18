@@ -873,16 +873,6 @@ void Battleground::BlockMovement(Player* plr)
 void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool SendPacket)
 {
     uint32 team = GetPlayerTeam(guid);
-    bool participant = false;
-    // Remove from lists/maps
-    BattlegroundPlayerMap::iterator itr = m_Players.find(guid);
-    if (itr != m_Players.end())
-    {
-        UpdatePlayersCountByTeam(team, true);               // -1 player
-        m_Players.erase(itr);
-        // check if the player was a participant of the match, or only entered through gm command (goname)
-        participant = true;
-    }
 
     BattlegroundScoreMap::iterator itr2 = m_PlayerScores.find(guid);
     if (itr2 != m_PlayerScores.end())
@@ -907,6 +897,17 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
 
     RemovePlayer(plr, guid);                                // BG subclass specific code
 
+    bool participant = false;
+    // Remove from lists/maps
+    BattlegroundPlayerMap::iterator itr = m_Players.find(guid);
+    if (itr != m_Players.end())
+    {
+        UpdatePlayersCountByTeam(team, true);               // -1 player
+        m_Players.erase(itr);
+        // check if the player was a participant of the match, or only entered through gm command (goname)
+        participant = true;
+    }
+
     if (participant) // if the player was a match participant, remove auras, calc rating, update queue
     {
         BattlegroundTypeId bgTypeId = GetTypeID();
@@ -920,7 +921,6 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
             // if arena, remove the specific arena auras
             if (isArena())
             {
-                plr->RemoveArenaAuras(true);                // removes debuffs / dots etc., we don't want the player to die after porting out
                 bgTypeId=BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
 
                 // unsummon current and summon old pet if there was one and there isn't a current pet
