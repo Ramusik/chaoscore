@@ -197,6 +197,7 @@ set(scripts_STAT_SRCS
   Northrend/DraktharonKeep/boss_tharon_ja.cpp
   Northrend/DraktharonKeep/boss_dred.cpp
   Northrend/wintergrasp.cpp
+  Northrend/argenttournament.cpp
 )
 
 message("  -> Prepared: Northrend")

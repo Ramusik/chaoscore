@@ -509,6 +509,7 @@ void AddSC_sholazar_basin();
 void AddSC_storm_peaks();
 void AddSC_zuldrak();
 void AddSC_crystalsong_forest();
+void AddSC_Argen_Tournament();
 void AddSC_isle_of_conquest();
 
 void AddSC_boss_baltharus();	//RubySanctum
@@ -1228,6 +1229,7 @@ void AddNorthrendScripts()
     AddSC_storm_peaks();
     AddSC_zuldrak();
     AddSC_crystalsong_forest();
+    AddSC_Argen_Tournament();
     AddSC_isle_of_conquest();
     AddSC_wintergrasp();
 
