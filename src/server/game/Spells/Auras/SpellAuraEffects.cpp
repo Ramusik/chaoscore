@@ -2364,6 +2364,8 @@ void AuraEffect::TriggerSpell(Unit* target, Unit* caster) const
                     case 63131:
                     // Shield Level 3
                     case 63132:
+                    // Remove Players from Phase
+                    case 64445:
                     // Ball of Flames Visual
                     case 71706:
                         return;

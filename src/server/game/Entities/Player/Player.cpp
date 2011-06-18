@@ -9258,6 +9258,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 4100:  // The Culling of Stratholme
             NumberOfFields = 13;
             break;
+        case 4445: // Ulduar Raid
+            NumberOfFields = 10;
+            break;
          default:
             NumberOfFields = 12;
             break;
@@ -9748,6 +9751,15 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(0xe10) << uint32(0x0);           // 7 gold
                 data << uint32(0xe11) << uint32(0x0);           // 8 green
                 data << uint32(0xe1a) << uint32(0x0);           // 9 show
+            }
+            break;
+        case 4445: //Ulduar
+            if (instance && mapid == 603)
+                instance->FillInitialWorldStates(data);
+            else
+            {
+                data << uint32(4132) << uint32(0);              // 9 WORLDSTATE_SHOW_TIMER(ALGALON)
+                data << uint32(4131) << uint32(60);             // 10 WORLDSTATE_ALGALON_TIMER
             }
             break;
         case 4710:

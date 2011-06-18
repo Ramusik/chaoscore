@@ -37,30 +37,25 @@ enum UlduarTypes
     TYPE_YOGGSARON              = 12,
     TYPE_ALGALON                = 13,
     TYPE_COLOSSUS               = 14, // unused as encounter
-
-    TYPE_SARA,
-    TYPE_BRAIN_DOOR_1,
-    TYPE_BRAIN_DOOR_2,
-    TYPE_BRAIN_DOOR_3,
-    DATA_KEEPER_SUPPORT_YOGG,
     
     // Assembly of Iorn
     DATA_STEELBREAKER,
     DATA_MOLGEIM,
     DATA_BRUNDIR,
 
+    // Razorscale
     DATA_EXP_COMMANDER,
     DATA_RAZORSCALE_CONTROL,
 
     // Kologarn:
+    DATA_LEFT_ARM,
+    DATA_RIGHT_ARM,
+
     // XT-002
     DATA_TOY_PILE_0,
     DATA_TOY_PILE_1,
     DATA_TOY_PILE_2,
     DATA_TOY_PILE_3,
-
-    DATA_LEFT_ARM,
-    DATA_RIGHT_ARM,
 
     // Freya Elders
     TYPE_ELDER_BRIGHTLEAF,
@@ -74,16 +69,26 @@ enum UlduarTypes
     DATA_STONE_DOOR,
     DATA_HODIR_RARE_CHEST,
 
-    DATA_CALL_TRAM,
-    //Mimiron
+    // Algalon
+    DATA_ALGALON_INTRO,
+    DATA_ALGALON_TIMER,
+    DATA_BRANN_ALGALON,
+
+    // Mimiron
     DATA_LEVIATHAN_MK_II,
     DATA_MIMIRON_ELEVATOR,
     DATA_AERIAL_UNIT,
     DATA_VX_001,
     DATA_MAGNETIC_CORE,
+    DATA_CALL_TRAM,
 
-    //Pre YoggSaron
+    // YoggSaron
+    TYPE_SARA,
+    TYPE_BRAIN_DOOR_1,
+    TYPE_BRAIN_DOOR_2,
+    TYPE_BRAIN_DOOR_3,
     DATA_ADD_HELP_FLAG,
+    DATA_KEEPER_SUPPORT_YOGG,
 };
 
 enum UlduarNPCs
@@ -124,6 +129,7 @@ enum UlduarNPCs
     NPC_YOGGSARON               = 33288,
     NPC_SARA                    = 33134,
     NPC_ALGALON                 = 32871,
+    NPC_BRANN_ALGALON           = 34064,
 
     // Hodir's Helper NPCs
     NPC_TOR_GREYCLOUD           = 32941,
@@ -189,14 +195,13 @@ enum UlduarGameObjects
     GO_RAZOR_HARPOON_3          = 194543,
     GO_RAZOR_HARPOON_4          = 194519,
     GO_RAZOR_BROKEN_HARPOON     = 194565,
-    GO_ALGALON_ACCESS           = 194628,
-    GO_ALGALON_DOOR_1           = 194911,
-    GO_ALGALON_DOOR_2           = 194767,
-    GO_ALGALON_PLATFORM         = 194715,
+    GO_ALGALON_DOOR             = 194767,
+    GO_ALGALON_FLOOR_COM        = 194715,
+    GO_ALGALON_FLOOR_OOC        = 194716,
     GO_ALGALON_GLOBE            = 194148,
     GO_ALGALON_BRIDGE           = 194253,
-    GO_ALGALON_B_VISUAL         = 194716,
-    GO_ALGALON_B_DOOR           = 194910,
+    GO_ALGALON_INVISDOOR        = 194910,
+    GO_ALGALON_CONSOLE          = 194628,
     GO_GIFT_OF_THE_OBSERVER     = 194821
 };
 
@@ -299,10 +304,15 @@ enum UlduarData
     DATA_PORTAL_PHASE = 1,
 };
 
-enum UlduarWorldstates
+enum UlduarWorldStates
 {
-    WORLDSTATE_ALGALON_TIME = 4131,
-    WORLDSTATE_ALGALON_SHOW = 4132
+    WORLDSTATE_SHOW_TIMER       = 4132,
+    WORLDSTATE_ALGALON_TIMER    = 4131
+};
+
+enum UlduarSharedActions
+{
+    ACTION_ALGALON_ASCEND      = -123460 //Wipe Raid, don't respawn
 };
 
 #endif

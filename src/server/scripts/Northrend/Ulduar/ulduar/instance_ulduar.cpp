@@ -124,13 +124,17 @@ public:
 
         // Algalon
         uint64 uiAlgalonGUID;
-        uint64 uiAlgalonBridgeGUID;
-        uint64 uiAlgalonBridgeVisualGUID;
-        uint64 uiAlgalonBridgeDoorGUID;
-        uint64 uiAlgalonGlobeGUID;
-        uint64 uiAlgalonDoor1GUID;
-        uint64 uiAlgalonDoor2GUID;
-        uint64 uiAlgalonAccessGUID;
+        uint64 AlgalonBrannGUID;
+        uint64 AlgalonDoorGUID;
+        uint64 AlgalonFloorOOCGUID;
+        uint64 AlgalonFloorCOMGUID;
+        uint64 AlgalonBridgeGUID;
+        uint64 AlgalonGlobeGUID;
+        uint64 AlgalonForceFieldGUID;
+        uint32 AlgalonIntroDone;
+        uint32 SignalTimerState;
+        uint32 SignalTimer;
+        uint32 SignalTimerMinutes;
 
         uint32 ColossusData;
         uint32 uiSupportKeeperFlag;
@@ -176,13 +180,16 @@ public:
             uiVezaxGUID               = 0;
             uiYoggSaronGUID           = 0;
             uiAlgalonGUID             = 0;
-            uiAlgalonBridgeGUID       = 0;
-            uiAlgalonBridgeVisualGUID = 0;
-            uiAlgalonBridgeDoorGUID   = 0;
-            uiAlgalonGlobeGUID        = 0;
-            uiAlgalonDoor1GUID        = 0;
-            uiAlgalonDoor2GUID        = 0;
-            uiAlgalonAccessGUID       = 0;
+            AlgalonBrannGUID          = 0;
+            AlgalonDoorGUID           = 0;
+            AlgalonBridgeGUID         = 0;
+            AlgalonGlobeGUID          = 0;
+            AlgalonFloorOOCGUID       = 0;
+            AlgalonFloorCOMGUID       = 0;
+            AlgalonForceFieldGUID     = 0;
+            SignalTimerState          = NOT_STARTED;
+            SignalTimer               = 0;
+            SignalTimerMinutes        = 0;
             uiSaraGUID                = 0;
             uiKologarnChestGUID       = 0;
             uiKologarnBridgeGUID      = 0;
@@ -211,6 +218,9 @@ public:
             memset(uiAssemblyGUIDs, 0, sizeof(uiAssemblyGUIDs));
             memset(XTToyPileGUIDs, 0, sizeof(XTToyPileGUIDs));
             memset(uiRazorHarpoonGUIDs, 0, sizeof(uiRazorHarpoonGUIDs));
+
+            AlgalonIntroDone = false;
+
         }
 
         bool IsEncounterInProgress() const
@@ -353,6 +363,13 @@ public:
             return false;
         }
 
+
+        void FillInitialWorldStates(WorldPacket& data)
+        {
+            data << uint32(WORLDSTATE_SHOW_TIMER)            << uint32(SignalTimerState == IN_PROGRESS);
+            data << uint32(WORLDSTATE_ALGALON_TIMER)         << uint32(SignalTimerMinutes ? SignalTimerMinutes : 60);
+        }
+
         void OnCreatureCreate(Creature* creature)
         {
             switch (creature->GetEntry())
@@ -479,13 +496,13 @@ public:
 
                 case NPC_ALGALON:
                     uiAlgalonGUID = creature->GetGUID();
-                    if (uiAlgalonCountdown < 62)
-                    {
-                        creature->setFaction(7);
-                        creature->setActive(true);
-                    }
-                    else
-                        creature->SetVisible(false);
+                    if (AlgalonIntroDone && !SignalTimerMinutes)
+                        creature->DespawnOrUnsummon();
+                    creature->setActive(true);
+                    break;
+                case NPC_BRANN_ALGALON:
+                    AlgalonBrannGUID = creature->GetGUID();
+                    creature->setActive(true);
                     break;
             }
 
@@ -622,40 +639,44 @@ public:
                     if (GetBossState(TYPE_RAZORSCALE) == IN_PROGRESS)
                         go->SetGoState(GO_STATE_ACTIVE);
                     break;
-                case GO_ALGALON_PLATFORM:
-                    HandleGameObject(NULL, false, go);
+                case GO_ALGALON_DOOR:
+                    AlgalonDoorGUID = go->GetGUID();
+                    go->SetGoState(GO_STATE_READY);
+                    if (AlgalonIntroDone)
+                        go->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_ALGALON_FLOOR_OOC:
+                    AlgalonFloorOOCGUID = go->GetGUID();
+                    go->SetGoState(GO_STATE_READY);
+                    go->setActive(true);
+                    go->SetPhaseMask(PHASEMASK_ANYWHERE,false);
+                    break;
+                case GO_ALGALON_FLOOR_COM:
+                    AlgalonFloorCOMGUID = go->GetGUID();
+                    go->SetGoState(GO_STATE_ACTIVE);
+                    go->SetPhaseMask(PHASEMASK_ANYWHERE,false);
                     break;
                 case GO_ALGALON_BRIDGE:
-                    uiAlgalonBridgeGUID = go->GetGUID();
-                    HandleGameObject(NULL, false, go);
-                    break;
-                case GO_ALGALON_B_VISUAL:
-                    uiAlgalonBridgeVisualGUID = go->GetGUID();
-                    HandleGameObject(NULL, false, go);
-                    break;
-                case GO_ALGALON_B_DOOR:
-                    uiAlgalonBridgeDoorGUID = go->GetGUID();
-                    HandleGameObject(NULL, true, go);
+                    AlgalonBridgeGUID = go->GetGUID();
+                    go->SetGoState(GO_STATE_READY);
+                    go->SetPhaseMask(PHASEMASK_ANYWHERE,false);
                     break;
                 case GO_ALGALON_GLOBE:
-                    uiAlgalonGlobeGUID = go->GetGUID();
-                    HandleGameObject(NULL, false, go);
+                    AlgalonGlobeGUID = go->GetGUID();
+                    HandleGameObject(0, false, go);
+                    go->SetPhaseMask(PHASEMASK_ANYWHERE,false);
                     break;
-                case GO_ALGALON_DOOR_1:
-                    uiAlgalonDoor1GUID = go->GetGUID();
-                    HandleGameObject(NULL, uiAlgalonCountdown < 62 ? true : false, go);
+                case GO_ALGALON_INVISDOOR:
+                    AlgalonForceFieldGUID = go->GetGUID();
+                    AddDoor(go, true);
+                    go->SetGoState(GO_STATE_ACTIVE);
+                    go->SetPhaseMask(PHASEMASK_ANYWHERE,false);
                     break;
-                case GO_ALGALON_DOOR_2:
-                    uiAlgalonDoor2GUID = go->GetGUID();
-                    HandleGameObject(NULL, uiAlgalonCountdown < 62 ? true : false, go);
-                    break;
-                case GO_ALGALON_ACCESS:
-                    uiAlgalonAccessGUID = go->GetGUID();
-                    if (uiAlgalonCountdown < 62)
+                case GO_ALGALON_CONSOLE:
+                    if (AlgalonIntroDone)
                     {
                         go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
-                        go->SetGoState(GO_STATE_ACTIVE);
-                    }
+                    }          
                     break;
             }
         }
@@ -786,48 +807,24 @@ public:
                     //        go->SetRespawnTime(go->GetRespawnDelay());
                     break;
                 case TYPE_ALGALON:
-                    switch (state)
+                    if (state == IN_PROGRESS)
                     {
-                        case SPECIAL:
-                            if (Creature* algalon = instance->GetCreature(uiAlgalonGUID))
-                            {
-                                algalon->setFaction(7);
-                                algalon->setActive(true);
-                                algalon->SetVisible(true);
-                            }
-                            HandleGameObject(uiAlgalonDoor1GUID, true);
-                            HandleGameObject(uiAlgalonDoor2GUID, true);
-                            uiAlgalonCountdown = 61;
-                            SaveToDB();
-                            break;
-                        case NOT_STARTED:
-                            HandleGameObject(uiAlgalonGlobeGUID, false);
-                            HandleGameObject(uiAlgalonBridgeGUID, false);
-                            HandleGameObject(uiAlgalonBridgeVisualGUID, false);
-                            HandleGameObject(uiAlgalonBridgeDoorGUID, true);
-                            break;
-                        case IN_PROGRESS:
-                            if (uiAlgalonCountdown > 60)
-                            {
-                                uiAlgalonCountdown = 60;
-                                DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 1);
-                                DoUpdateWorldState(WORLDSTATE_ALGALON_TIME, uiAlgalonCountdown);
-                                SaveToDB();
-                            }
-                            HandleGameObject(uiAlgalonGlobeGUID, true);
-                            HandleGameObject(uiAlgalonBridgeGUID, true);
-                            HandleGameObject(uiAlgalonBridgeVisualGUID, true);
-                            HandleGameObject(uiAlgalonBridgeDoorGUID, false);
-                            break;
-                        case DONE:
-                            uiAlgalonCountdown = 0;
-                            DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 0);
-                            SaveToDB();
-                            HandleGameObject(uiAlgalonGlobeGUID, false);
-                            HandleGameObject(uiAlgalonBridgeGUID, false);
-                            HandleGameObject(uiAlgalonBridgeVisualGUID, false);
-                            HandleGameObject(uiAlgalonBridgeDoorGUID, true);
-                            break;
+                        HandleGameObject(AlgalonDoorGUID, false);     // Close Door
+                        HandleGameObject(AlgalonFloorOOCGUID, true);  // Makes bridge disappear
+                        HandleGameObject(AlgalonFloorCOMGUID, false); // Makes round combat floor appear 
+                        HandleGameObject(AlgalonBridgeGUID, true);    // Removes collision from bridge
+                        HandleGameObject(AlgalonGlobeGUID,true);      // "Roomchanging" 
+                        HandleGameObject(AlgalonForceFieldGUID,false);// Invisible Forcefield, prevents escape
+                    }
+                    else
+                    {
+                        HandleGameObject(AlgalonDoorGUID, true);
+                        HandleGameObject(AlgalonFloorOOCGUID, false);
+                        HandleGameObject(AlgalonFloorCOMGUID, true);
+                        HandleGameObject(AlgalonBridgeGUID, false);
+                        HandleGameObject(AlgalonGlobeGUID,false);
+                        HandleGameObject(AlgalonForceFieldGUID,true);
+ 
                     }
                     break;
              }
@@ -886,6 +883,35 @@ public:
                 case DATA_HODIR_RARE_CHEST:
                     HodirRareCacheData = data;
                     break;
+                case DATA_ALGALON_INTRO:
+                    AlgalonIntroDone = data;
+                    SaveToDB();
+                    break;
+                case DATA_ALGALON_TIMER:
+                    {
+                        if (SignalTimerState == data)
+                            break;
+                        switch (data)
+                        {
+                        case IN_PROGRESS:
+                            SignalTimer = 60000;
+                            SignalTimerMinutes = 60;
+                            DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 1);
+                            DoUpdateWorldState(WORLDSTATE_ALGALON_TIMER , SignalTimerMinutes);
+                            break;
+                        case DONE:
+                            SignalTimer = 0;
+                            SignalTimerMinutes = 0;
+                            DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 0);
+                            break;
+                        default:
+                            break;
+                        }
+
+                        SignalTimerState = data;
+                        SaveToDB();
+                        break;
+                    }
                 default:
                     break;
             }
@@ -949,6 +975,10 @@ public:
                 case TYPE_SARA:                 return uiSaraGUID;
                 // Algalon
                 case TYPE_ALGALON:              return uiAlgalonGUID;
+                case GO_ALGALON_DOOR:
+                    return AlgalonDoorGUID;
+                case NPC_BRANN_ALGALON:
+                    return AlgalonBrannGUID;
                 // razorscale expedition commander
                 case DATA_EXP_COMMANDER:        return uiExpCommanderGUID;
                 case GO_RAZOR_HARPOON_1:        return uiRazorHarpoonGUIDs[0];
@@ -978,6 +1008,10 @@ public:
                     return uiSupportKeeperFlag;
                 case DATA_HODIR_RARE_CHEST:
                    return HodirRareCacheData;
+                case DATA_ALGALON_INTRO:
+                    return AlgalonIntroDone;
+                case DATA_ALGALON_TIMER:
+                    return SignalTimerState;
             }
 
             return 0;
@@ -988,7 +1022,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "U U " << GetBossSaveData() << GetData(TYPE_COLOSSUS) << " " << uiPlayerDeathFlag << " " << uiAlgalonCountdown;
+            saveStream << "U U " << GetBossSaveData() << GetData(TYPE_COLOSSUS) << " " << uiPlayerDeathFlag<< " "  << AlgalonIntroDone << " " << SignalTimerState << " " << SignalTimerMinutes;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -1005,13 +1039,14 @@ public:
             OUT_LOAD_INST_DATA(strIn);
 
             char dataHead1, dataHead2;
+            uint32 data1,data2,data3;
 
             std::istringstream loadStream(strIn);
             loadStream >> dataHead1 >> dataHead2;
 
             if (dataHead1 == 'U' && dataHead2 == 'U')
             {
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                for (uint8 i = 0; i <= MAX_ENCOUNTER; ++i)
                 {
                     uint32 tmpState;
                     loadStream >> tmpState;
@@ -1023,38 +1058,51 @@ public:
                     // needed because of custom GetBossState(uint32 type) ?
                     uiEncounter[i] = tmpState;
                 }
-                uint32 tmpState, tmpState2, tmpState3;
-                loadStream >> tmpState >> tmpState2 >> tmpState3;
+                uint32 tmpState, tmpState2;
+                loadStream >> tmpState >> tmpState2;
+
                 ColossusData = tmpState;
                 uiPlayerDeathFlag = tmpState2;
-                uiAlgalonCountdown = tmpState3;
+
+                loadStream >> data1;
+                loadStream >> data2;
+                loadStream >> data3;
+
+                SetData(DATA_ALGALON_INTRO, data1);
+                SignalTimerState = data2;
+                SignalTimerMinutes = data3;
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
+
         void Update(uint32 diff)
         {
-            if (uiAlgalonCountdown > 0 && uiAlgalonCountdown < 61)
+            if (SignalTimerState == IN_PROGRESS)
             {
-                if (uiCountdownTimer < diff)
+                if (SignalTimer <= diff)
                 {
-                    uiAlgalonCountdown--;
-
-                    if (uiAlgalonCountdown)
+                    --SignalTimerMinutes;
+                    SignalTimer = 60000;
+                    if (SignalTimerMinutes)
                     {
-                        DoUpdateWorldState(WORLDSTATE_ALGALON_SHOW, 1);
-                        DoUpdateWorldState(WORLDSTATE_ALGALON_TIME, uiAlgalonCountdown);
+                        DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 1);
+                        DoUpdateWorldState(WORLDSTATE_ALGALON_TIMER, SignalTimerMinutes);
                     }
                     else
                     {
-                        if (Creature* algalon = instance->GetCreature(uiAlgalonGUID))
-                            algalon->AI()->DoAction(1);
+                        SignalTimerState = FAIL;
+                        DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 0);	
+                        if (Creature* Algalon = instance->GetCreature(uiAlgalonGUID))
+                            Algalon->AI()->DoAction(ACTION_ALGALON_ASCEND);
+
+                        SetBossState(TYPE_ALGALON, FAIL);
                     }
                     SaveToDB();
-                    uiCountdownTimer += 1*MINUTE*IN_MILLISECONDS;
                 }
-                uiCountdownTimer -= diff;
+                else
+                    SignalTimer -= diff;
             }
         }
     };
