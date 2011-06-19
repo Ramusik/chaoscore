@@ -1295,17 +1295,24 @@ class go_celestial_console : public GameObjectScript
 
         bool OnGossipHello(Player* player, GameObject* go)
         {
-            if (Creature* Brann = go->SummonCreature(NPC_BRANN_ALGALON, WPs[0][0],WPs[0][1], WPs[0][2])) 
-            {
-                go->SetFlag(GAMEOBJECT_FLAGS,  GO_FLAG_UNK1);
-                Brann->AI()->DoAction(ACTION_BRANN_INTRO);
-                if (GameObject* Door = ObjectAccessor::GetGameObject(*go, go->GetInstanceScript()->GetData64((GO_ALGALON_DOOR))))
-                    Door->SetGoState(GO_STATE_ACTIVE);
+			InstanceScript* _instance = go->GetInstanceScript();
 
-            }
-            return false;
+			uint32 item = uint32(go->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? 45796 : 45798);
+			if (player->HasItemCount(item, 1))
+			{
+				if (Creature* Brann = go->SummonCreature(NPC_BRANN_ALGALON, WPs[0][0],WPs[0][1], WPs[0][2])) 
+				{
+					go->SetFlag(GAMEOBJECT_FLAGS,  GO_FLAG_UNK1);
+					Brann->AI()->DoAction(ACTION_BRANN_INTRO);
+					if (GameObject* Door = ObjectAccessor::GetGameObject(*go, go->GetInstanceScript()->GetData64((GO_ALGALON_DOOR))))
+						Door->SetGoState(GO_STATE_ACTIVE);
+
+				}
+			}
+			return true;
         }
 };
+
 class spell_algalon_cosmic_smash_initial : public SpellScriptLoader
 {
     public:
